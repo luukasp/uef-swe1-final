@@ -1,5 +1,6 @@
 import Router, {Request, Response} from 'express';
 import attendanceRouter from "./attendance.router";
+import cr from "./child.router";
 
 const v1 = Router();
 
@@ -20,5 +21,6 @@ v1.options('/', (req: Request, res: Response) => {
 });
 
 v1.use("/attendance", attendanceRouter);
+v1.use("/child", cr);
 
 export default v1;

@@ -1,11 +1,13 @@
 import { Feature108 } from "#/components/blocks/shadcnblocks-com-feature108";
 import { hideNavbar, showNavbar } from "#/lib/navbar_store";
-import { createFileRoute } from "@tanstack/react-router";
-import { Layout, Pointer, Zap, Globe } from "lucide-react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Layout, Pointer, Zap, Globe, ShieldUser } from "lucide-react";
 import { useEffect } from "react";
 import ThemeToggle from "#/components/ThemeToggle";
+import { Button } from "#/components/ui/button";
 
 export const Route = createFileRoute("/")({ component: App });
+
 const demoData = {
   badge: "shadcnblocks.com",
   heading: "A Collection of Components Built With Shadcn & Tailwind",
@@ -59,6 +61,7 @@ const demoData = {
   ],
 };
 function App() {
+  const navigate = useNavigate();
   useEffect(() => {
     hideNavbar();
     return () => {
@@ -73,12 +76,16 @@ function App() {
         <button
           type="button"
           title="Change language (placeholder)"
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition-all hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          className="flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition-all hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
         >
           <Globe className="h-5 w-5" />
           <span className="sr-only">Change language</span>
         </button>
         <ThemeToggle />
+
+        <Button variant="outline" onClick={() => navigate({ to: "/auth" })}>
+          <ShieldUser /> Authentificate
+        </Button>
       </div>
 
       <Feature108 {...demoData} />

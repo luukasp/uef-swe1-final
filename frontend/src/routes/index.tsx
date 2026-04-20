@@ -1,8 +1,7 @@
 import { Feature108 } from "#/components/blocks/shadcnblocks-com-feature108";
-import { hideNavbar, showNavbar } from "#/lib/navbar_store";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Layout, Pointer, Zap, Globe, ShieldUser } from "lucide-react";
-import { useEffect } from "react";
+
 import ThemeToggle from "#/components/ThemeToggle";
 import { Button } from "#/components/ui/button";
 
@@ -61,13 +60,8 @@ const demoData = {
   ],
 };
 function App() {
+  // navigate hook call
   const navigate = useNavigate();
-  useEffect(() => {
-    hideNavbar();
-    return () => {
-      showNavbar();
-    };
-  }, []);
 
   return (
     <main className="page-wrap relative px-4 pb-8 pt-14">

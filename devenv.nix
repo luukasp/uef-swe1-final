@@ -11,12 +11,24 @@
   services.mysql.enable = true;
     # The default is MariaDB. To use MySQL instead:
     # services.mysql.package = pkgs.mysql80;
-    services.mysql.initialDatabases = [{ name = "test_database"; }];
+    services.mysql.initialDatabases = [{ name = "app_db"; }];
     services.mysql.ensureUsers = [
       {
-        name = "test_database";
-        password = "test_database";
-        ensurePermissions = { "test_database.*" = "ALL PRIVILEGES"; };
+        name = "app";
+        password = "application_password";
+        ensurePermissions = { "app_db.*" = "ALL PRIVILEGES"; };
       }
     ];
+    scripts.brun.exec = ''
+      cd backend/ && npm run dev
+    '';
+    scripts.frun.exec = ''
+      cd frontend/ && npm run dev
+    '';
+    scripts.db_migrate.exec = ''
+      cd backend/ && npm run db:migrate
+    '';
+    scripts.dev.exec = ''
+      brun && frun
+    '';
 }

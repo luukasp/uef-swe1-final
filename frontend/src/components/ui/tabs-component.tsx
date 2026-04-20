@@ -282,7 +282,7 @@ export function AuthIllustration({
 }) {
   return (
     <div
-      className={`w-full h-56 flex items-center justify-center bg-gradient-to-br from-primary/10 to-primary/5 p-6 ${rounded ? "rounded-lg" : ""} ${className}`}
+      className={`w-full h-56 flex items-center justify-center bg-linear-to-br from-primary/10 to-primary/5 p-6 ${rounded ? "rounded-lg" : ""} ${className}`}
       aria-hidden
     >
       <div className="w-full h-full bg-white/6 p-6 flex items-center justify-center rounded-md">

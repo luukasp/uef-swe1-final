@@ -1,8 +1,9 @@
 import { Feature108 } from "#/components/blocks/shadcnblocks-com-feature108";
 import { hideNavbar, showNavbar } from "#/lib/navbar_store";
 import { createFileRoute } from "@tanstack/react-router";
-import { Layout, Pointer, Zap } from "lucide-react";
+import { Layout, Pointer, Zap, Globe } from "lucide-react";
 import { useEffect } from "react";
+import ThemeToggle from "#/components/ThemeToggle";
 
 export const Route = createFileRoute("/")({ component: App });
 const demoData = {
@@ -66,10 +67,20 @@ function App() {
   }, []);
 
   return (
-    <main className="page-wrap px-4 pb-8 pt-14">
-      <div cla>
-        
+    <main className="page-wrap relative px-4 pb-8 pt-14">
+      {/* Top right corner container for language + theme controls */}
+      <div className="absolute right-4 top-4 z-50 flex items-center gap-2">
+        <button
+          type="button"
+          title="Change language (placeholder)"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-border bg-background text-foreground shadow-sm transition-all hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        >
+          <Globe className="h-5 w-5" />
+          <span className="sr-only">Change language</span>
+        </button>
+        <ThemeToggle />
       </div>
+
       <Feature108 {...demoData} />
     </main>
   );

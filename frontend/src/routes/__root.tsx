@@ -41,7 +41,6 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <HeadContent />
       </head>
       <body className="font-sans antialiased wrap-anywhere">
-        <Component />
         {children}
         {/*<FooterSection />*/}
         <TanStackDevtools

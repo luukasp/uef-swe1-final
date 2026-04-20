@@ -42,6 +42,19 @@ const betterAuthOpts: BetterAuthOptions = {
     emailAndPassword: {
         enabled: true
     },
+    socialProviders: {
+        google: {
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        },
+        microsoft: {
+            clientId: process.env.MICROSOFT_CLIENT_ID,
+            clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
+            tenantId: 'common',
+            authority: 'https://login.microsoftonline.com',
+            prompt: 'select_account consent'
+        }
+    },
     plugins: [
         admin(adminOpts),
         username(usernameOpts),

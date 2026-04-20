@@ -21,6 +21,7 @@ cr.post("/", async (req: Request, res: Response) => {
         gender: body.gender,
         medicalInfo: body.medicalInfo,
     } as Child;
+    console.log(newChild);
     const c = await ChildController.create(newChild);
     return res.status(200).send({
         status: 200,

@@ -44,8 +44,9 @@ export default class ChildController {
             data.firstName &&
             data.lastName &&
             data.dob &&
-            data.gender &&
-            data.parentIds)
+            data.gender //&&
+            //data.parentIds
+            )
         ) {
             return false;
         }
@@ -59,13 +60,13 @@ export default class ChildController {
                 medical_info: data.medicalInfo
             });
 
-        for (let parentId of data.parentIds) {
+        /**for (let parentId of data.parentIds) {
             await database.insert(parentToChild)
                 .values({
                     parent_id: parentId,
                     child_id: data.id,
                 });
-        }
+        }*/
         return c;
     }
     static update = async (id: string, data: Child) => {

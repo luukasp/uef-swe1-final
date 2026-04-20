@@ -47,6 +47,9 @@ const betterAuthOpts: BetterAuthOptions = {
         username(usernameOpts),
         jwt(),
         openAPI()
+    ],
+    trustedOrigins: [
+        process.env.FRONTEND_URL
     ]
 } as BetterAuthOptions;
 

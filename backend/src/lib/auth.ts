@@ -1,7 +1,7 @@
 import {betterAuth, BetterAuthOptions} from "better-auth";
 import {drizzleAdapter} from "better-auth/adapters/drizzle"
 import db from "../database"
-import {admin, AdminOptions, username, UsernameOptions} from "better-auth/plugins";
+import {admin, AdminOptions, username, UsernameOptions, jwt, openAPI} from "better-auth/plugins";
 import * as schema from "../models/schema";
 import {ac, adminRole, defaultRole} from "./permissions";
 
@@ -45,6 +45,8 @@ const betterAuthOpts: BetterAuthOptions = {
     plugins: [
         admin(adminOpts),
         username(usernameOpts),
+        jwt(),
+        openAPI()
     ]
 } as BetterAuthOptions;
 

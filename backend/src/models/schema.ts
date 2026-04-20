@@ -12,7 +12,7 @@ import {
 // We don't need a separate parent table, even though Nikolaos
 // added it, as we can just use the user's id and check roles
 // Parent role is part of access control config in permisions.ts
- export const user = mysqlTable("user", {
+export const user = mysqlTable("user", {
     id: varchar("id", { length: 36 }).primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
     email: varchar("email", { length: 255 }).notNull().unique(),
@@ -23,12 +23,12 @@ import {
         .defaultNow()
         .$onUpdate(() => /* @__PURE__ */ new Date())
         .notNull(),
-    username: varchar("username", { length: 255 }).unique(),
-    displayUsername: text("display_username"),
     role: text("role"),
     banned: boolean("banned").default(false),
     banReason: text("ban_reason"),
     banExpires: timestamp("ban_expires", { fsp: 3 }),
+    username: varchar("username", { length: 255 }).unique(),
+    displayUsername: text("display_username"),
 });
 
 export const session = mysqlTable(
@@ -90,6 +90,14 @@ export const verification = mysqlTable(
     },
     (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
+
+export const jwks = mysqlTable("jwks", {
+    id: varchar("id", { length: 36 }).primaryKey(),
+    publicKey: text("public_key").notNull(),
+    privateKey: text("private_key").notNull(),
+    createdAt: timestamp("created_at", { fsp: 3 }).notNull(),
+    expiresAt: timestamp("expires_at", { fsp: 3 }),
+});
 
 // Child is not an user that can log on, nor a role
 // A child is simply a data object in the database

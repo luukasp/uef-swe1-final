@@ -10,6 +10,7 @@ services:
     ports:
       - "3306:${DB_HOST_PORT}"
       - "33060:${DB_HOST_SECURE_PORT}"
+    restart: unless-stopped
     volumes:
       - db_data:/var/lib/mysql
     networks:

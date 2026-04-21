@@ -1,4 +1,5 @@
-import Router, {Request, Response} from 'express';
+import Router, {Response} from 'express';
+import {Request} from "@core/express";
 import AttendanceController, {Attendance} from "../controllers/attendance.controller";
 
 const attendanceRouter = Router();

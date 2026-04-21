@@ -1,11 +1,13 @@
-import Router, {Request, Response} from "express";
+import Router, {Response, NextFunction} from "express";
+import {Request} from "@core/express";
 import ChildController, {Child} from "../controllers/child.controller";
+import requireSession from "../middlewares/requireSession";
 
 const cr = Router();
 
-cr.get("/", async (req, res) => {
+cr.get("/", requireSession, async (req: Request, res: Response) => {
     const b = req.body;
-    const c = await ChildController.getChildren(b.parentId);
+    //const c = await ChildController.getChildren(b.parentId);
     res.status(200).send({
         status: 200,
         data: "tbd"

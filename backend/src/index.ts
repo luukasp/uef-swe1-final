@@ -18,10 +18,11 @@ app.use(cors({
     credentials: true, // Allow credentials (cookies, authorization headers, etc.)
 }));
 app.use(helmet());
+app.all("/api/auth/{*any}", toNodeHandler(auth));
 
 app.use('/api/v1', v1);
 
-app.all("/api/auth/{*any}", toNodeHandler(auth));
+app.use(express.json());
 
 app.all('/{*splat}', async (req: Request, res: Response) => {
     res.status(404).send({

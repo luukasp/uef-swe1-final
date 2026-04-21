@@ -18,7 +18,6 @@ import TabsBasic, {
 } from "#/components/ui/tabs-component";
 import { Mail, User, Key } from "lucide-react";
 import { signInWithEmail, signUpWithEmail } from "#/lib/api/auth";
-import { hideNavbar, showNavbar } from "#/lib/navbar_store";
 
 /**
  * Route binding for the file-based router
@@ -35,14 +34,6 @@ export default function Login() {
   const [identifier, setIdentifier] = useState<string>(""); // username or email
   const [password, setPassword] = useState<string>("");
   const [remember, setRemember] = useState<boolean>(false);
-
-  // hide the global navbar while on the auth route
-  useEffect(() => {
-    hideNavbar();
-    return () => {
-      showNavbar();
-    };
-  }, []);
 
   // Register form state
   const [regName, setRegName] = useState("");

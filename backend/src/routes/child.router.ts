@@ -6,15 +6,25 @@ import requireSession from "../middlewares/requireSession";
 const cr = Router();
 
 cr.get("/", requireSession, async (req: Request, res: Response) => {
-    const b = req.body;
-    //const c = await ChildController.getChildren(b.parentId);
+    const b = req.session.userId;
+    console.log("current user: " + b);
+    const c = await ChildController.getChildren(b);
     res.status(200).send({
         status: 200,
-        data: "tbd"
+        current_user: b,
+        data: c
     });
 });
 
-cr.post("/", async (req: Request, res: Response) => {
+cr.get("/list", requireSession, async (req: Request, res: Response) => {
+    const c = await ChildController.findAll();
+    res.status(200).send({
+        status: 200,
+        data: c
+    });
+});
+
+cr.post("/", requireSession, async (req: Request, res: Response) => {
     const body = req.body;
     const newChild: Child = {
         firstName: body.firstName,
@@ -31,7 +41,7 @@ cr.post("/", async (req: Request, res: Response) => {
     });
 });
 
-cr.delete("/:id", async (req: Request, res: Response) => {
+cr.delete("/:id", requireSession, async (req: Request, res: Response) => {
     const id = req.params.id as string;
     await ChildController.delete(id);
     return res.status(200).send({
@@ -40,7 +50,7 @@ cr.delete("/:id", async (req: Request, res: Response) => {
     });
 });
 
-cr.patch("/:id", async (req: Request, res: Response) => {
+cr.patch("/:id", requireSession, async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const body = req.body;
     const newChild: Child = {

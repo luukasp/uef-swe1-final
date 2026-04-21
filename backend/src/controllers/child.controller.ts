@@ -1,17 +1,19 @@
 import database from "../database";
 import {child, parentToChild, user} from "../models/schema";
-import {eq} from "drizzle-orm";
+import {eq, Placeholder, SQL} from "drizzle-orm";
 import {randomUUID} from "node:crypto";
 
 export interface Child {
     id?: string;
     firstName?: string;
     lastName?: string;
-    dob?: Date;
+    dob?: string;
     gender?: string;
     medicalInfo?: string;
     parentIds?: string[];
 }
+
+type NewChild = typeof child.$inferInsert;
 
 export default class ChildController {
     static findAll = async () => {
@@ -50,23 +52,9 @@ export default class ChildController {
         ) {
             return false;
         }
-        let c = await database.insert(child)
-            .values({
-                id: data.id,
-                first_name: data.firstName,
-                last_name: data.lastName,
-                date_of_birth: data.dob,
-                gender: data.gender,
-                medical_info: data.medicalInfo
-            });
+        let _d = data as NewChild;
+        let c = database.insert(child).values({id: data.id, first_name: data.firstName, last_name: data.lastName, date_of_birth: data.dob, gender: data.gender, medical_info: data.medicalInfo}).returning();
 
-        /**for (let parentId of data.parentIds) {
-            await database.insert(parentToChild)
-                .values({
-                    parent_id: parentId,
-                    child_id: data.id,
-                });
-        }*/
         return c;
     }
     static update = async (id: string, data: Child) => {

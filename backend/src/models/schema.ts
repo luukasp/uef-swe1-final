@@ -1,44 +1,46 @@
 import { relations } from "drizzle-orm";
 import {
-    mysqlTable,
+    pgTable,
     varchar,
     text,
     timestamp,
     boolean,
     index,
-    date, longtext, primaryKey
-} from "drizzle-orm/mysql-core";
+    date,
+    primaryKey,
+    integer, uuid
+} from "drizzle-orm/pg-core";
 
 // We don't need a separate parent table, even though Nikolaos
 // added it, as we can just use the user's id and check roles
 // Parent role is part of access control config in permisions.ts
-export const user = mysqlTable("user", {
+export const user = pgTable("user", {
     id: varchar("id", { length: 36 }).primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
     email: varchar("email", { length: 255 }).notNull().unique(),
     emailVerified: boolean("email_verified").default(false).notNull(),
     image: text("image"),
-    createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { fsp: 3 })
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
         .defaultNow()
         .$onUpdate(() => /* @__PURE__ */ new Date())
         .notNull(),
     role: text("role"),
     banned: boolean("banned").default(false),
     banReason: text("ban_reason"),
-    banExpires: timestamp("ban_expires", { fsp: 3 }),
+    banExpires: timestamp("ban_expires", { mode: "date", precision: 3 }),
     username: varchar("username", { length: 255 }).unique(),
     displayUsername: text("display_username"),
 });
 
-export const session = mysqlTable(
+export const session = pgTable(
     "session",
     {
         id: varchar("id", { length: 36 }).primaryKey(),
-        expiresAt: timestamp("expires_at", { fsp: 3 }).notNull(),
+        expiresAt: timestamp("expires_at", { mode: "date", precision: 3 }).notNull(),
         token: varchar("token", { length: 255 }).notNull().unique(),
-        createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
-        updatedAt: timestamp("updated_at", { fsp: 3 })
+        createdAt: timestamp("created_at", { mode: "date", precision: 3 }).defaultNow().notNull(),
+        updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
             .$onUpdate(() => /* @__PURE__ */ new Date())
             .notNull(),
         ipAddress: text("ip_address"),
@@ -51,7 +53,7 @@ export const session = mysqlTable(
     (table) => [index("session_userId_idx").on(table.userId)],
 );
 
-export const account = mysqlTable(
+export const account = pgTable(
     "account",
     {
         id: varchar("id", { length: 36 }).primaryKey(),
@@ -63,27 +65,27 @@ export const account = mysqlTable(
         accessToken: text("access_token"),
         refreshToken: text("refresh_token"),
         idToken: text("id_token"),
-        accessTokenExpiresAt: timestamp("access_token_expires_at", { fsp: 3 }),
-        refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { fsp: 3 }),
+        accessTokenExpiresAt: timestamp("access_token_expires_at", { mode: "date", precision: 3 }),
+        refreshTokenExpiresAt: timestamp("refresh_token_expires_at", { mode: "date", precision: 3 }),
         scope: text("scope"),
         password: text("password"),
-        createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
-        updatedAt: timestamp("updated_at", { fsp: 3 })
+        createdAt: timestamp("created_at", { mode: "date", precision: 3 }).defaultNow().notNull(),
+        updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
             .$onUpdate(() => /* @__PURE__ */ new Date())
             .notNull(),
     },
     (table) => [index("account_userId_idx").on(table.userId)],
 );
 
-export const verification = mysqlTable(
+export const verification = pgTable(
     "verification",
     {
         id: varchar("id", { length: 36 }).primaryKey(),
         identifier: varchar("identifier", { length: 255 }).notNull(),
         value: text("value").notNull(),
-        expiresAt: timestamp("expires_at", { fsp: 3 }).notNull(),
-        createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull(),
-        updatedAt: timestamp("updated_at", { fsp: 3 })
+        expiresAt: timestamp("expires_at", { mode: "date", precision: 3 }).notNull(),
+        createdAt: timestamp("created_at", { mode: "date", precision: 3 }).defaultNow().notNull(),
+        updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
             .defaultNow()
             .$onUpdate(() => /* @__PURE__ */ new Date())
             .notNull(),
@@ -91,40 +93,41 @@ export const verification = mysqlTable(
     (table) => [index("verification_identifier_idx").on(table.identifier)],
 );
 
-export const jwks = mysqlTable("jwks", {
+export const jwks = pgTable("jwks", {
     id: varchar("id", { length: 36 }).primaryKey(),
     publicKey: text("public_key").notNull(),
     privateKey: text("private_key").notNull(),
-    createdAt: timestamp("created_at", { fsp: 3 }).notNull(),
-    expiresAt: timestamp("expires_at", { fsp: 3 }),
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 }).notNull(),
+    expiresAt: timestamp("expires_at", { mode: "date", precision: 3 }),
 });
 
 // Child is not an user that can log on, nor a role
 // A child is simply a data object in the database
-export const child = mysqlTable("child", {
-   id: varchar("id", { length: 36 }).primaryKey(),
-   first_name: varchar("name", { length: 255 }).notNull(),
-   last_name: varchar("last_name", { length: 255 }).notNull(),
-    date_of_birth: date().notNull(),
-    gender: varchar("gender", {length: 45}).notNull(),
-    medical_info: longtext("medical_info"),
+export const child = pgTable("child", {
+        id: uuid("id").primaryKey(),
+        first_name: varchar("name", { length: 255 }).notNull(),
+        last_name: varchar("last_name", { length: 255 }).notNull(),
+        date_of_birth: date("date_of_birth").notNull(),
+        gender: varchar("gender", { length: 45 }).notNull(),
+        medical_info: text("medical_info"),
     },
     (table) => [index("child_name_idx").on(table.first_name), index("child_surname_idx").on(table.last_name)]
 );
 
-export const attendance = mysqlTable("attendance", {
-  id: varchar("id", { length: 36 }).primaryKey(),
-    check_in_time: timestamp("check_in_time", {fsp: 3}).notNull(),
-    check_out_time: timestamp("check_out_time", {fsp: 3}).notNull(),
+export const attendance = pgTable("attendance", {
+    id: uuid("id").primaryKey(),
+    attendance_date: date("attendance_date").notNull(),
+    check_in_time: integer("check_in_time").notNull(),
+    check_out_time: integer("check_out_time").notNull(),
     status: boolean("status").notNull().default(false),
-    justification: longtext("justification"),
+    justification: text("justification"),
     child_id: varchar("child_id", { length: 36 }).references(() => child.id),
 });
 
-export const parentToChild = mysqlTable("parentToChild", {
-    parent_id: varchar("parent_id", { length: 36 }).references(() => user.id),
-    child_id: varchar("child_id", { length: 36 }).references(() => child.id),
-}, (t) => [primaryKey({columns: [t.parent_id, t.child_id]})]
+export const parentToChild = pgTable("parentToChild", {
+        parent_id: varchar("parent_id", { length: 36 }).notNull().references(() => user.id),
+        child_id: uuid("child_id").notNull().references(() => child.id),
+    }, (t) => [primaryKey({ columns: [t.parent_id, t.child_id] })]
 );
 
 export const userRelations = relations(user, ({ many }) => ({

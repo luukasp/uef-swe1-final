@@ -35,7 +35,7 @@ const usernameOpts: UsernameOptions = {
 const betterAuthOpts: BetterAuthOptions = {
     database: drizzleAdapter(db,
         {
-            provider: "mysql",
+            provider: "pg",
             schema: schema
         }
     ),

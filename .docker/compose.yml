@@ -1,20 +1,23 @@
 services:
   database:
     container_name: app_db
-    image: mysql:latest
+    image: postgres
     environment:
-      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASS}
-      - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD=${DB_PASSWORD}
-      - MYSQL_DATABASE=${DB_SCHEMA_NAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_DB=${DB_SCHEMA_NAME}
     ports:
-      - "3306:${DB_HOST_PORT}"
-      - "33060:${DB_HOST_SECURE_PORT}"
+      - "5432:${DB_HOST_PORT}"
     restart: unless-stopped
     volumes:
-      - db_data:/var/lib/mysql
+      - db_data:/var/lib/postgresql/
     networks:
       - app
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - "8080:8080"
 
 networks:
   app:

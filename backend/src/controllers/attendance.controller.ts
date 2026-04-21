@@ -5,8 +5,9 @@ import {randomUUID} from "node:crypto";
 
 export interface Attendance {
     id?: string;
-    check_in_time?: Date;
-    check_out_time?: Date;
+    attendance_date: string;
+    check_in_time?: number;
+    check_out_time?: number;
     status?: boolean;
     justification?: string;
     child_id?: string;
@@ -40,17 +41,19 @@ export default class AttendanceController {
     }
     static create = async (data: Attendance) => {
         data.id = randomUUID();
-        if (data.check_in_time == data.check_out_time || data.check_in_time == null || data.check_out_time == null || data.status == null || data.child_id == null) {
+        if (data.check_in_time == data.check_out_time || data.check_in_time == null || data.check_out_time == null || data.attendance_date == null || data.child_id == null) {
             return false;
         }
-        return await database.insert(attendance).values({
+        let a = database.insert(attendance).values({
             id: data.id,
+            attendance_date: data.attendance_date,
             check_in_time: data.check_in_time,
             check_out_time: data.check_out_time,
             status: data.status,
             justification: data.justification,
-            child_id: data.child_id,
-        });
+            child_id: data.child_id
+        }).returning();
+        return a;
     }
     static delete = async (id: string) => {
         return await database.delete(attendance).where(eq(attendance.id, id));

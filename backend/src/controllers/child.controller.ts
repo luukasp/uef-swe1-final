@@ -1,7 +1,8 @@
 import database from "../database";
 import {child, parentToChild, user} from "../models/schema";
-import {eq, Placeholder, SQL} from "drizzle-orm";
+import {eq} from "drizzle-orm";
 import {randomUUID} from "node:crypto";
+import {email} from "better-auth";
 
 export interface Child {
     id?: string;
@@ -28,7 +29,11 @@ export default class ChildController {
         return await _;
     }
     static getParents = async (id: string) => {
-        let _ = database.select().from(child).where(eq(child.id, id))
+        let _ = database.select({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+        }).from(child).where(eq(child.id, id))
             .leftJoin(parentToChild, eq(child.id, parentToChild.child_id))
             .leftJoin(user, eq(parentToChild.parent_id, user.id));
         return await _;
@@ -53,14 +58,26 @@ export default class ChildController {
             data.firstName &&
             data.lastName &&
             data.dob &&
-            data.gender //&&
-            //data.parentIds
+            data.gender &&
+            data.parentIds
             )
         ) {
             return false;
         }
-        let _d = data as NewChild;
-        let c = database.insert(child).values({id: data.id, first_name: data.firstName, last_name: data.lastName, date_of_birth: data.dob, gender: data.gender, medical_info: data.medicalInfo}).returning();
+        let c = await database.insert(child).values({
+            id: data.id,
+            first_name: data.firstName,
+            last_name: data.lastName,
+            date_of_birth: data.dob,
+            gender: data.gender,
+            medical_info: data.medicalInfo
+        }).returning();
+        for (let parent of data.parentIds) {
+            await database.insert(parentToChild).values({
+                parent_id: parent,
+                child_id: data.id,
+            });
+        }
 
         return c;
     }

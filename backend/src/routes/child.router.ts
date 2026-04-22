@@ -14,6 +14,24 @@ cr.get("/", requireSession, async (req: Request, res: Response) => {
     });
 });
 
+cr.get("/:id/parents", requireSession, async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const c = await ChildController.getParents(id);
+    res.status(200).send({
+        status: 200,
+        data: c
+    });
+});
+
+cr.get("/:id", requireSession, async (req: Request, res: Response) => {
+    const id = req.params.id as string;
+    const c = await ChildController.findOne(id);
+    res.status(200).send({
+        status: 200,
+        data: c
+    });
+});
+
 cr.get("/list", requireSession, async (req: Request, res: Response) => {
     const c = await ChildController.findAll();
     res.status(200).send({
@@ -24,6 +42,7 @@ cr.get("/list", requireSession, async (req: Request, res: Response) => {
 
 cr.post("/", requireSession, async (req: Request, res: Response) => {
     const body = req.body;
+    const submitterId = req.session.user.id;
     const newChild: Child = {
         firstName: body.firstName,
         lastName: body.lastName,
@@ -31,7 +50,14 @@ cr.post("/", requireSession, async (req: Request, res: Response) => {
         gender: body.gender,
         medicalInfo: body.medicalInfo,
     } as Child;
-    console.log(newChild);
+    let parentIds: string[] = [];
+    if (body.parentIds) {
+        parentIds = body.parentIds;
+    }
+    if (parentIds.indexOf(submitterId) === -1) {
+        parentIds.push(submitterId);
+    }
+    newChild.parentIds = parentIds;
     const c = await ChildController.create(newChild);
     return res.status(200).send({
         status: 200,

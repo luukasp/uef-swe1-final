@@ -4,7 +4,6 @@
 
 # Ignore transpilation output
 **/*.js
-**/*.d.ts
 
 # Ignore migration data and assets
 drizzle/*

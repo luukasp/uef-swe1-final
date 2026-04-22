@@ -1,4 +1,5 @@
-import Router, {Request, Response} from 'express';
+import Router, {NextFunction, Response} from 'express';
+import {Request} from "@core/express";
 import attendanceRouter from "./attendance.router";
 import cr from "./child.router";
 

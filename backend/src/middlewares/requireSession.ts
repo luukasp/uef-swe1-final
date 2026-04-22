@@ -9,6 +9,7 @@ export default async function requireSession(req: Request, res: Response, next: 
             headers: fromNodeHeaders(req.headers),
         });
         if (!session) {
+
             return res.status(401).send({
                 error: "Unauthorized",
                 status: 401,
@@ -18,6 +19,7 @@ export default async function requireSession(req: Request, res: Response, next: 
         next();
     }
     catch (e: any) {
+        if (res.headersSent) return;
         return res.status(500).send({
             error: e.message,
             status: 500,

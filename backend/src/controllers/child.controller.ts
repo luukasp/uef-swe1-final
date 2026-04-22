@@ -86,7 +86,7 @@ export default class ChildController {
             first_name: data.firstName,
             last_name: data.lastName,
             medical_info: data.medicalInfo,
-        }).where(eq(child.id, id));
+        }).where(eq(child.id, id)).returning();
     }
 
     static delete = async (id: string) => {

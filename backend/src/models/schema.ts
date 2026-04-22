@@ -121,12 +121,12 @@ export const attendance = pgTable("attendance", {
     check_out_time: integer("check_out_time").notNull(),
     status: boolean("status").notNull().default(false),
     justification: text("justification"),
-    child_id: varchar("child_id", { length: 36 }).references(() => child.id),
+    child_id: varchar("child_id", { length: 36 }).references(() => child.id, {onDelete: "cascade"}),
 });
 
 export const parentToChild = pgTable("parentToChild", {
-        parent_id: varchar("parent_id", { length: 36 }).notNull().references(() => user.id),
-        child_id: uuid("child_id").notNull().references(() => child.id),
+        parent_id: varchar("parent_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" }),
+        child_id: uuid("child_id").notNull().references(() => child.id, {onDelete: "cascade"}),
     }, (t) => [primaryKey({ columns: [t.parent_id, t.child_id] })]
 );
 

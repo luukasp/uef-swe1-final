@@ -37,7 +37,7 @@ export default class AttendanceController {
             return "NOT_ALLOWED_TO_CHANGE_CHILD_ID";
         }
         return await database.update(attendance).set({check_in_time: data.check_in_time, check_out_time: data.check_out_time, status: data.status, justification: data.justification})
-            .where(eq(attendance.id, id));
+            .where(eq(attendance.id, id)).returning();
     }
     static create = async (data: Attendance) => {
         data.id = randomUUID();

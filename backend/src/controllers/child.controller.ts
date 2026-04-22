@@ -35,7 +35,14 @@ export default class ChildController {
     }
     // Select children of a specific parent
     static getChildren = async (id: string) => {
-        let _ = database.select().from(user).where(eq(user.id, id))
+        let _ = database.select({
+            id: child.id,
+            name: child.first_name,
+            surname: child.last_name,
+            gender: child.gender,
+            dob: child.date_of_birth,
+            medicalInfo: child.medical_info,
+        }).from(user).where(eq(user.id, id))
             .rightJoin(parentToChild, eq(user.id, parentToChild.parent_id))
             .rightJoin(child, eq(parentToChild.child_id, child.id));
         return await _;

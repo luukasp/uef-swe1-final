@@ -6,12 +6,10 @@ import requireSession from "../middlewares/requireSession";
 const cr = Router();
 
 cr.get("/", requireSession, async (req: Request, res: Response) => {
-    const b = req.session.userId;
-    console.log("current user: " + b);
-    const c = await ChildController.getChildren(b);
+    const session = await req.session;
+    const c = await ChildController.getChildren(session.user.id);
     res.status(200).send({
         status: 200,
-        current_user: b,
         data: c
     });
 });

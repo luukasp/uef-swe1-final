@@ -11,6 +11,16 @@ import {
     integer, uuid
 } from "drizzle-orm/pg-core";
 
+export const system_metadata = pgTable("__system_metadata", {
+    key: varchar("key", { length: 255 }).primaryKey(),
+    value: text("value").notNull(),
+    createdAt: timestamp("created_at", { mode: "date", precision: 3 }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { mode: "date", precision: 3 })
+        .defaultNow()
+        .$onUpdate(() => /* @__PURE__ */ new Date())
+        .notNull(),
+});
+
 // We don't need a separate parent table, even though Nikolaos
 // added it, as we can just use the user's id and check roles
 // Parent role is part of access control config in permisions.ts

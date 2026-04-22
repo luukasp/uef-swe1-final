@@ -9,3 +9,6 @@
 # Ignore migration data and assets
 drizzle/*
 auth-schema.ts
+
+# Ignore superuser password file
+.passwd

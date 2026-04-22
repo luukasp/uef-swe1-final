@@ -23,7 +23,7 @@ attendanceRouter.post("/list", requireSession, async (req: Request, res: Respons
     res.status(200).json(allAttendances);
 });
 
-attendanceRouter.post("/:child_id", requireSession, async (req: Request, res: Response) => {
+attendanceRouter.post("/child/:child_id", requireSession, async (req: Request, res: Response) => {
     const body = req.body;
     const childId = req.params.child_id as string;
     const newAttn: Attendance = {
@@ -50,7 +50,7 @@ attendanceRouter.post("/:child_id", requireSession, async (req: Request, res: Re
     }
 });
 
-attendanceRouter.get("/:child_id/list", requireSession, async (req: Request, res: Response) => {
+attendanceRouter.get("/child/:child_id/list", requireSession, async (req: Request, res: Response) => {
     const child_id = req.params.child_id as string;
     const attn = await AttendanceController.findAllByChild(child_id);
     if (!attn) {

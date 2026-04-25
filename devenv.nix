@@ -8,17 +8,17 @@
       install.enable = true;
     };
   };
-  services.mysql.enable = true;
-    # The default is MariaDB. To use MySQL instead:
-    # services.mysql.package = pkgs.mysql80;
-    services.mysql.initialDatabases = [{ name = "app_db"; }];
-    services.mysql.ensureUsers = [
-      {
-        name = "app";
-        password = "application_password";
-        ensurePermissions = { "app_db.*" = "ALL PRIVILEGES"; };
-      }
-    ];
+  packages = [ pkgs.coreutils ];
+    services.postgres = {
+      enable = true;
+      extensions = extensions: [ extensions.postgis ];
+
+      initialDatabases = [{ name = "mydb"; }];
+
+      initialScript = ''
+        CREATE EXTENSION IF NOT EXISTS postgis;
+      '';
+    };
     scripts.brun.exec = ''
       cd backend/ && npm run dev
     '';

@@ -1,19 +1,16 @@
 {
-  "projectName": "frontend",
+  "projectName": "start-app",
   "mode": "file-router",
   "typescript": true,
-  "packageManager": "npm",
-  "includeExamples": false,
   "tailwind": true,
+  "packageManager": "pnpm",
   "addOnOptions": {},
-  "envVarValues": {},
-  "git": false,
-  "routerOnly": false,
+  "git": true,
   "version": 1,
-  "framework": "react",
+  "framework": "react-cra",
   "chosenAddOns": [
-    "biome",
-    "shadcn",
-    "store"
+    "eslint",
+    "nitro",
+    "start"
   ]
 }

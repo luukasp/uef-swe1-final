@@ -1,38 +1,38 @@
-"use client";
+"use client"
 
-import React from "react";
+import React from "react"
 
 export type TabItem = {
-  value: string;
+  value: string
   /** Label can be any JSX (text, icon + text, etc.) */
-  label: React.ReactNode;
+  label: React.ReactNode
   /** Optional icon shown before the label (useful for lucide icons) */
-  icon?: React.ReactNode;
+  icon?: React.ReactNode
   /** Panel content */
-  children?: React.ReactNode;
-};
+  children?: React.ReactNode
+}
 
 export type TabsBasicProps = {
-  items?: TabItem[];
+  items?: TabItem[]
   /** default selection for uncontrolled usage */
-  defaultValue?: string;
+  defaultValue?: string
   /** controlled value - when present, component is controlled */
-  value?: string;
+  value?: string
   /** called when selection changes */
-  onChange?: (value: string) => void;
+  onChange?: (value: string) => void
   /** additional wrapper classes */
-  className?: string;
+  className?: string
   /** horizontal only: make triggers expand to full width and distribute equally */
-  fullWidth?: boolean;
+  fullWidth?: boolean
   /** orientation: horizontal or vertical */
-  orientation?: "horizontal" | "vertical";
+  orientation?: "horizontal" | "vertical"
   /** render only tab list */
-  showList?: boolean;
+  showList?: boolean
   /** render only panels */
-  showPanels?: boolean;
+  showPanels?: boolean
   /** loading state: when true, disable triggers and show spinner in active panel */
-  loading?: boolean;
-};
+  loading?: boolean
+}
 
 /**
  * TabsBasic
@@ -65,102 +65,102 @@ export default function TabsBasic({
             <div className="p-2 text-sm text-muted-foreground">No tabs</div>
           ),
         },
-      ];
+      ]
 
-  const isControlled = typeof value === "string";
+  const isControlled = typeof value === "string"
 
   const initialSelection =
     defaultValue ??
     normalized.find((t) => t.value === "signin")?.value ??
-    normalized[0].value;
+    normalized[0].value
 
   const [internalActive, setInternalActive] =
-    React.useState<string>(initialSelection);
-  const active = isControlled ? (value as string) : internalActive;
+    React.useState<string>(initialSelection)
+  const active = isControlled ? (value as string) : internalActive
 
   React.useEffect(() => {
     if (!isControlled) {
-      if (defaultValue) setInternalActive(defaultValue);
+      if (defaultValue) setInternalActive(defaultValue)
       else
         setInternalActive(
           normalized.find((t) => t.value === "signin")?.value ??
-            normalized[0].value,
-        );
+            normalized[0].value
+        )
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [defaultValue, items.length]);
+  }, [defaultValue, items.length])
 
   const selectValue = (v: string) => {
-    if (!isControlled) setInternalActive(v);
-    onChange?.(v);
-  };
+    if (!isControlled) setInternalActive(v)
+    onChange?.(v)
+  }
 
-  const idBase = React.useId();
-  const triggersRef = React.useRef<Array<HTMLButtonElement | null>>([]);
+  const idBase = React.useId()
+  const triggersRef = React.useRef<Array<HTMLButtonElement | null>>([])
 
   const focusTriggerByIndex = (index: number) => {
-    const btn = triggersRef.current[index];
-    if (btn) btn.focus();
-  };
+    const btn = triggersRef.current[index]
+    if (btn) btn.focus()
+  }
 
   // keyboard navigation: horizontal uses Left/Right, vertical uses Up/Down
   const handleTriggerKeyDown = (e: React.KeyboardEvent, index: number) => {
-    const count = normalized.length;
-    const horizontal = orientation === "horizontal";
+    const count = normalized.length
+    const horizontal = orientation === "horizontal"
 
     if (
       horizontal &&
       ["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)
     )
-      e.preventDefault();
+      e.preventDefault()
     if (!horizontal && ["ArrowUp", "ArrowDown", "Home", "End"].includes(e.key))
-      e.preventDefault();
+      e.preventDefault()
 
     if (horizontal) {
       if (e.key === "ArrowRight") {
-        const next = (index + 1) % count;
-        focusTriggerByIndex(next);
-        selectValue(normalized[next].value);
+        const next = (index + 1) % count
+        focusTriggerByIndex(next)
+        selectValue(normalized[next].value)
       } else if (e.key === "ArrowLeft") {
-        const prev = (index - 1 + count) % count;
-        focusTriggerByIndex(prev);
-        selectValue(normalized[prev].value);
+        const prev = (index - 1 + count) % count
+        focusTriggerByIndex(prev)
+        selectValue(normalized[prev].value)
       } else if (e.key === "Home") {
-        focusTriggerByIndex(0);
-        selectValue(normalized[0].value);
+        focusTriggerByIndex(0)
+        selectValue(normalized[0].value)
       } else if (e.key === "End") {
-        focusTriggerByIndex(count - 1);
-        selectValue(normalized[count - 1].value);
+        focusTriggerByIndex(count - 1)
+        selectValue(normalized[count - 1].value)
       }
     } else {
       if (e.key === "ArrowDown") {
-        const next = (index + 1) % count;
-        focusTriggerByIndex(next);
-        selectValue(normalized[next].value);
+        const next = (index + 1) % count
+        focusTriggerByIndex(next)
+        selectValue(normalized[next].value)
       } else if (e.key === "ArrowUp") {
-        const prev = (index - 1 + count) % count;
-        focusTriggerByIndex(prev);
-        selectValue(normalized[prev].value);
+        const prev = (index - 1 + count) % count
+        focusTriggerByIndex(prev)
+        selectValue(normalized[prev].value)
       } else if (e.key === "Home") {
-        focusTriggerByIndex(0);
-        selectValue(normalized[0].value);
+        focusTriggerByIndex(0)
+        selectValue(normalized[0].value)
       } else if (e.key === "End") {
-        focusTriggerByIndex(count - 1);
-        selectValue(normalized[count - 1].value);
+        focusTriggerByIndex(count - 1)
+        selectValue(normalized[count - 1].value)
       }
     }
-  };
+  }
 
   const listBase =
-    orientation === "vertical" ? "flex flex-col gap-2" : "flex gap-2";
+    orientation === "vertical" ? "flex flex-col gap-2" : "flex gap-2"
   const listSize =
-    fullWidth && orientation === "horizontal" ? "w-full" : "w-fit";
+    fullWidth && orientation === "horizontal" ? "w-full" : "w-fit"
 
   // Active and inactive styles
   const activeBtnClasses =
-    "bg-primary-600 text-white shadow-md ring-1 ring-primary-700";
-  const inactiveBtnClasses = "text-foreground/90 hover:bg-primary/10";
-  const disabledBtnClasses = "opacity-60 cursor-not-allowed";
+    "bg-primary-600 text-white shadow-md ring-1 ring-primary-700"
+  const inactiveBtnClasses = "text-foreground/90 hover:bg-primary/10"
+  const disabledBtnClasses = "opacity-60 cursor-not-allowed"
 
   return (
     <div className={`w-full ${className}`}>
@@ -168,17 +168,17 @@ export default function TabsBasic({
         <div
           role="tablist"
           aria-orientation={orientation}
-          className={`${listBase} ${listSize} bg-transparent rounded-md p-1 mb-4`}
+          className={`${listBase} ${listSize} mb-4 rounded-md bg-transparent p-1`}
         >
           {normalized.map((tab, idx) => {
-            const isSelected = tab.value === active;
+            const isSelected = tab.value === active
             const baseBtn =
               orientation === "vertical"
                 ? "w-full text-left flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none"
-                : "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none";
+                : "flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors focus:outline-none"
 
-            let btnClass = `${baseBtn} ${isSelected ? activeBtnClasses : inactiveBtnClasses}`;
-            if (loading) btnClass += ` ${disabledBtnClasses}`;
+            let btnClass = `${baseBtn} ${isSelected ? activeBtnClasses : inactiveBtnClasses}`
+            if (loading) btnClass += ` ${disabledBtnClasses}`
 
             return (
               <button
@@ -196,21 +196,21 @@ export default function TabsBasic({
                 disabled={loading}
               >
                 {tab.icon ? (
-                  <span className="inline-flex items-center mr-2">
+                  <span className="mr-2 inline-flex items-center">
                     {tab.icon}
                   </span>
                 ) : null}
                 <span className="inline-flex items-center">{tab.label}</span>
               </button>
-            );
+            )
           })}
         </div>
       ) : null}
 
       {showPanels ? (
-        <div className="w-full relative">
+        <div className="relative w-full">
           {normalized.map((tab) => {
-            const isSelected = tab.value === active;
+            const isSelected = tab.value === active
             return (
               <div
                 key={tab.value}
@@ -218,11 +218,11 @@ export default function TabsBasic({
                 id={`${idBase}-panel-${tab.value}`}
                 aria-labelledby={`${idBase}-tab-${tab.value}`}
                 hidden={!isSelected}
-                className={`${isSelected ? "block" : "hidden"} w-full relative`}
+                className={`${isSelected ? "block" : "hidden"} relative w-full`}
               >
                 {/* Panel content */}
                 <div
-                  className={`${loading ? "opacity-50 pointer-events-none" : ""}`}
+                  className={`${loading ? "pointer-events-none opacity-50" : ""}`}
                 >
                   {tab.children}
                 </div>
@@ -233,9 +233,9 @@ export default function TabsBasic({
                     className="absolute inset-0 z-10 flex items-center justify-center"
                     aria-hidden
                   >
-                    <div className="flex flex-col items-center gap-2 bg-white/40 dark:bg-black/40 p-4 rounded-md backdrop-blur-sm">
+                    <div className="flex flex-col items-center gap-2 rounded-md bg-white/40 p-4 backdrop-blur-sm dark:bg-black/40">
                       <svg
-                        className="animate-spin h-8 w-8 text-primary-600"
+                        className="text-primary-600 h-8 w-8 animate-spin"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -261,12 +261,12 @@ export default function TabsBasic({
                   </div>
                 ) : null}
               </div>
-            );
+            )
           })}
         </div>
       ) : null}
     </div>
-  );
+  )
 }
 
 /**
@@ -277,22 +277,22 @@ export function AuthIllustration({
   className = "",
   rounded = true,
 }: {
-  className?: string;
-  rounded?: boolean;
+  className?: string
+  rounded?: boolean
 }) {
   return (
     <div
-      className={`w-full h-56 flex items-center justify-center bg-linear-to-br from-primary/10 to-primary/5 p-6 ${rounded ? "rounded-lg" : ""} ${className}`}
+      className={`flex h-56 w-full items-center justify-center bg-linear-to-br from-primary/10 to-primary/5 p-6 ${rounded ? "rounded-lg" : ""} ${className}`}
       aria-hidden
     >
-      <div className="w-full h-full bg-white/6 p-6 flex items-center justify-center rounded-md">
+      <div className="flex h-full w-full items-center justify-center rounded-md bg-white/6 p-6">
         <svg
           width="320"
           height="200"
           viewBox="0 0 320 200"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          className="max-w-full max-h-full"
+          className="max-h-full max-w-full"
         >
           <rect
             width="320"
@@ -310,5 +310,5 @@ export function AuthIllustration({
         </svg>
       </div>
     </div>
-  );
+  )
 }

@@ -9,22 +9,31 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as ParentsRouteRouteImport } from './routes/parents/route'
+import { Route as AuthRouteRouteImport } from './routes/auth/route'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ParentsIndexRouteImport } from './routes/parents/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ParentsNewsRouteImport } from './routes/parents/news'
 import { Route as ParentsMessageRouteImport } from './routes/parents/message'
 import { Route as ParentsEmergenciesRouteImport } from './routes/parents/emergencies'
+import { Route as AuthRegisterRouteImport } from './routes/auth/register'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
 
-const AuthRoute = AuthRouteImport.update({
+const ParentsRouteRoute = ParentsRouteRouteImport.update({
+  id: '/parents',
+  path: '/parents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ParentsRouteRoute = ParentsRouteRouteImport.update({
-  id: '/parents',
-  path: '/parents',
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -36,6 +45,11 @@ const ParentsIndexRoute = ParentsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => ParentsRouteRoute,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const ParentsNewsRoute = ParentsNewsRouteImport.update({
   id: '/news',
@@ -52,83 +66,123 @@ const ParentsEmergenciesRoute = ParentsEmergenciesRouteImport.update({
   path: '/emergencies',
   getParentRoute: () => ParentsRouteRoute,
 } as any)
+const AuthRegisterRoute = AuthRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/auth': typeof AuthRouteRouteWithChildren
   '/parents': typeof ParentsRouteRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
   '/parents/emergencies': typeof ParentsEmergenciesRoute
   '/parents/message': typeof ParentsMessageRoute
   '/parents/news': typeof ParentsNewsRoute
+  '/admin/': typeof AdminIndexRoute
   '/parents/': typeof ParentsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
   '/parents/emergencies': typeof ParentsEmergenciesRoute
   '/parents/message': typeof ParentsMessageRoute
   '/parents/news': typeof ParentsNewsRoute
+  '/admin': typeof AdminIndexRoute
   '/parents': typeof ParentsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/auth': typeof AuthRouteRouteWithChildren
   '/parents': typeof ParentsRouteRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
   '/parents/emergencies': typeof ParentsEmergenciesRoute
   '/parents/message': typeof ParentsMessageRoute
   '/parents/news': typeof ParentsNewsRoute
+  '/admin/': typeof AdminIndexRoute
   '/parents/': typeof ParentsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/parents'
+    | '/admin'
     | '/auth'
+    | '/parents'
+    | '/auth/login'
+    | '/auth/register'
     | '/parents/emergencies'
     | '/parents/message'
     | '/parents/news'
+    | '/admin/'
     | '/parents/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/auth/login'
+    | '/auth/register'
     | '/parents/emergencies'
     | '/parents/message'
     | '/parents/news'
+    | '/admin'
     | '/parents'
   id:
     | '__root__'
     | '/'
-    | '/parents'
+    | '/admin'
     | '/auth'
+    | '/parents'
+    | '/auth/login'
+    | '/auth/register'
     | '/parents/emergencies'
     | '/parents/message'
     | '/parents/news'
+    | '/admin/'
     | '/parents/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  AuthRouteRoute: typeof AuthRouteRouteWithChildren
   ParentsRouteRoute: typeof ParentsRouteRouteWithChildren
-  AuthRoute: typeof AuthRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/parents': {
       id: '/parents'
       path: '/parents'
       fullPath: '/parents'
       preLoaderRoute: typeof ParentsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -144,6 +198,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/parents/'
       preLoaderRoute: typeof ParentsIndexRouteImport
       parentRoute: typeof ParentsRouteRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/parents/news': {
       id: '/parents/news'
@@ -166,8 +227,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ParentsEmergenciesRouteImport
       parentRoute: typeof ParentsRouteRoute
     }
+    '/auth/register': {
+      id: '/auth/register'
+      path: '/register'
+      fullPath: '/auth/register'
+      preLoaderRoute: typeof AuthRegisterRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
   }
 }
+
+interface AdminRouteRouteChildren {
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
+interface AuthRouteRouteChildren {
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
+}
+
+const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthLoginRoute: AuthLoginRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
+}
+
+const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
+  AuthRouteRouteChildren,
+)
 
 interface ParentsRouteRouteChildren {
   ParentsEmergenciesRoute: typeof ParentsEmergenciesRoute
@@ -189,8 +290,9 @@ const ParentsRouteRouteWithChildren = ParentsRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
+  AuthRouteRoute: AuthRouteRouteWithChildren,
   ParentsRouteRoute: ParentsRouteRouteWithChildren,
-  AuthRoute: AuthRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

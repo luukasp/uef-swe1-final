@@ -1,30 +1,32 @@
-"use client"
-import { createFileRoute } from "@tanstack/react-router"
+"use client";
+// eslint-disable-next-line import/no-duplicates
+import { createFileRoute } from "@tanstack/react-router";
 import {
-  CheckCircle2,
-  Calendar,
-  Utensils,
-  MessageCircle,
   AlertCircle,
-  UserCheck,
+  Calendar,
+  CheckCircle2,
   Clock,
   Image as ImageIcon,
-} from "lucide-react"
+  MessageCircle,
+  UserCheck,
+  Utensils,
+} from "lucide-react";
+// eslint-disable-next-line import/no-duplicates
+import { Link } from "@tanstack/react-router";
 import {
   Dialog,
+  DialogClose,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
-  DialogClose,
-  DialogDescription,
-} from "@/components/ui/dialog"
-import { Link } from "@tanstack/react-router"
+} from "@/components/ui/dialog";
 
 export const Route = createFileRoute("/parents/")({
   component: ParentsIndex,
-})
+});
 
 function ParentsIndex() {
   return (
@@ -265,5 +267,5 @@ function ParentsIndex() {
         </div>
       </div>
     </div>
-  )
+  );
 }

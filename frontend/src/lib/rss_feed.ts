@@ -13,7 +13,7 @@ const parser = new Parser();
  * Placeholder data shown when feed parsing fails or returns no useful items.
  * Kept menu-focused for quick dialog rendering in the UI.
  */
-const FALLBACK_MENU_ITEMS: FeedItem[] = [
+const FALLBACK_MENU_ITEMS: Array<FeedItem> = [
   {
     title: "Breakfast: Oatmeal with banana slices",
     link: "#",

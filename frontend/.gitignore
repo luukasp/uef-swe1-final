@@ -1,0 +1,5 @@
+# Ignore environment variables, except for .env-template
+.env
+!.env-template
+
+node_modules

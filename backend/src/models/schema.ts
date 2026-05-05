@@ -140,6 +140,14 @@ export const parentToChild = pgTable("parentToChild", {
     }, (t) => [primaryKey({ columns: [t.parent_id, t.child_id] })]
 );
 
+export const group = pgTable("group", {
+    id: uuid("id").primaryKey(),
+    teacher_id: varchar("teacher_id", { length: 36 }).notNull().references(() => user.id, { onDelete: "cascade" }),
+    child_ids: uuid("child_id").array().references(() => child.id, { onDelete: "cascade" }),
+},
+    (t) => [(index("group_teacher_id_idx").on(t.teacher_id))],
+    );
+
 export const userRelations = relations(user, ({ many }) => ({
     sessions: many(session),
     accounts: many(account),

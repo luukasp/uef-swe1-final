@@ -4,8 +4,9 @@ import ChildController, {Child} from "../controllers/child.controller";
 import requireSession from "../middlewares/requireSession";
 
 const cr = Router();
+cr.use(requireSession);
 
-cr.get("/", requireSession, async (req: Request, res: Response) => {
+cr.get("/", async (req: Request, res: Response) => {
     const session = await req.session;
     const c = await ChildController.getChildren(session.user.id);
     res.status(200).send({
@@ -14,7 +15,16 @@ cr.get("/", requireSession, async (req: Request, res: Response) => {
     });
 });
 
-cr.get("/:id/parents", requireSession, async (req: Request, res: Response) => {
+cr.get("/list", async (req: Request, res: Response) => {
+    console.log("Router: Getting all children");
+    const c = await ChildController.findAll();
+    res.status(200).send({
+        status: 200,
+        data: c
+    });
+});
+
+cr.get("/:id/parents", async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const c = await ChildController.getParents(id);
     res.status(200).send({
@@ -23,7 +33,7 @@ cr.get("/:id/parents", requireSession, async (req: Request, res: Response) => {
     });
 });
 
-cr.get("/:id", requireSession, async (req: Request, res: Response) => {
+cr.get("/:id", async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const c = await ChildController.findOne(id);
     res.status(200).send({
@@ -32,15 +42,7 @@ cr.get("/:id", requireSession, async (req: Request, res: Response) => {
     });
 });
 
-cr.get("/list", requireSession, async (req: Request, res: Response) => {
-    const c = await ChildController.findAll();
-    res.status(200).send({
-        status: 200,
-        data: c
-    });
-});
-
-cr.post("/", requireSession, async (req: Request, res: Response) => {
+cr.post("/", async (req: Request, res: Response) => {
     const body = req.body;
     const submitterId = req.session.user.id;
     const newChild: Child = {
@@ -65,7 +67,7 @@ cr.post("/", requireSession, async (req: Request, res: Response) => {
     });
 });
 
-cr.delete("/:id", requireSession, async (req: Request, res: Response) => {
+cr.delete("/:id", async (req: Request, res: Response) => {
     const id = req.params.id as string;
     await ChildController.delete(id);
     return res.status(200).send({
@@ -74,7 +76,7 @@ cr.delete("/:id", requireSession, async (req: Request, res: Response) => {
     });
 });
 
-cr.patch("/:id", requireSession, async (req: Request, res: Response) => {
+cr.patch("/:id", async (req: Request, res: Response) => {
     const id = req.params.id as string;
     const body = req.body;
     const newChild: Child = {

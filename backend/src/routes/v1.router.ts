@@ -2,6 +2,7 @@ import Router, {NextFunction, Response} from 'express';
 import {Request} from "@core/express";
 import attendanceRouter from "./attendance.router";
 import cr from "./child.router";
+import gr from "./group.router"
 
 const v1 = Router();
 
@@ -13,15 +14,8 @@ v1.get('/', (req: Request, res: Response) => {
     });
 });
 
-v1.head('/', (req: Request, res: Response) => {
-    res.status(204);
-});
-
-v1.options('/', (req: Request, res: Response) => {
-    res.status(204).header('Accept', 'application/json').header('Allow', 'HEAD, OPTIONS, GET');
-});
-
 v1.use("/attendance", attendanceRouter);
 v1.use("/child", cr);
+v1.use("/group", gr);
 
 export default v1;

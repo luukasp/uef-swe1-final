@@ -1,0 +1,438 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "KinderConnect API",
+    "version": "1.0.0",
+    "description": "API documentation for the KinderConnect backend. Includes child, attendance, group, and menu proxy endpoints."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Local development server (v1 prefix)"
+    }
+  ],
+  "paths": {
+    "/child/": {
+      "get": {
+        "summary": "List children for current session user",
+        "responses": {
+          "200": {
+            "description": "A list of children assigned to the authenticated parent",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChildrenEnvelope" }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new child and assign to the authenticated parent",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ChildCreate" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Child created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChildEnvelope" }
+              }
+            }
+          },
+          "400": { "description": "Bad request" }
+        }
+      }
+    },
+    "/child/list": {
+      "get": {
+        "summary": "Return all children in the system (admin)",
+        "responses": {
+          "200": {
+            "description": "All children",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChildrenEnvelope" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/child/{id}": {
+      "get": {
+        "summary": "Get a specific child by id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Child",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChildEnvelope" }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update a child",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ChildUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ChildEnvelope" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a child",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/child/{id}/parents": {
+      "get": {
+        "summary": "Get parent(s) for a given child",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Parents list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ParentsEnvelope" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attendance/child/{child_id}/list": {
+      "get": {
+        "summary": "List attendance records for a child",
+        "parameters": [
+          {
+            "name": "child_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Attendance list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/Attendance" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attendance/child/{child_id}": {
+      "post": {
+        "summary": "Create an attendance record for a child",
+        "parameters": [
+          {
+            "name": "child_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AttendanceCreate" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Attendance" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/attendance/{id}": {
+      "patch": {
+        "summary": "Update an attendance record",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AttendanceUpdate" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Updated",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Attendance" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete attendance record",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "200": { "description": "Deleted" } }
+      }
+    },
+    "/group/": {
+      "get": {
+        "summary": "List groups",
+        "responses": { "200": { "description": "Groups list" } }
+      },
+      "post": {
+        "summary": "Create group",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GroupCreate" }
+            }
+          }
+        },
+        "responses": { "200": { "description": "Created" } }
+      }
+    },
+    "/group/{id}": {
+      "get": {
+        "summary": "Get group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "200": { "description": "Group" } }
+      },
+      "delete": {
+        "summary": "Delete group",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/group/auto": {
+      "post": {
+        "summary": "Auto-create groups",
+        "responses": { "200": { "description": "Auto groups" } }
+      }
+    },
+    "/group/all": {
+      "delete": {
+        "summary": "Delete all groups",
+        "responses": { "204": { "description": "Deleted" } }
+      }
+    },
+    "/menu/rss": {
+      "get": {
+        "summary": "Proxy to external catering RSS feed",
+        "responses": { "200": { "description": "RSS XML" } }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Child": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "first_name": { "type": "string" },
+          "last_name": { "type": "string" },
+          "date_of_birth": { "type": "string", "format": "date" },
+          "gender": { "type": "string" },
+          "medical_info": { "type": "string", "nullable": true }
+        }
+      },
+      "ChildCreate": {
+        "type": "object",
+        "required": ["firstName", "lastName", "dob"],
+        "properties": {
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "dob": { "type": "string", "format": "date" },
+          "gender": { "type": "string" },
+          "medicalInfo": { "type": "string" }
+        }
+      },
+      "ChildUpdate": {
+        "type": "object",
+        "properties": {
+          "firstName": { "type": "string" },
+          "lastName": { "type": "string" },
+          "medicalInfo": { "type": "string" }
+        }
+      },
+      "ChildrenEnvelope": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "integer" },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Child" }
+          }
+        }
+      },
+      "ChildEnvelope": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "integer" },
+          "data": { "$ref": "#/components/schemas/Child" }
+        }
+      },
+      "ParentsEnvelope": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "integer" },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "name": { "type": "string" },
+                "email": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "Attendance": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "attendance_date": { "type": "string", "format": "date" },
+          "check_in_time": { "type": "integer" },
+          "check_out_time": { "type": "integer" },
+          "status": { "type": "boolean" },
+          "justification": { "type": "string", "nullable": true },
+          "child_id": { "type": "string" }
+        }
+      },
+      "AttendanceCreate": {
+        "type": "object",
+        "required": [
+          "attendance_date",
+          "check_in_time",
+          "check_out_time",
+          "status"
+        ],
+        "properties": {
+          "attendance_date": { "type": "string", "format": "date" },
+          "check_in_time": { "type": "integer" },
+          "check_out_time": { "type": "integer" },
+          "status": { "type": "boolean" },
+          "justification": { "type": "string" }
+        }
+      },
+      "AttendanceUpdate": {
+        "type": "object",
+        "properties": {
+          "check_in_time": { "type": "integer" },
+          "check_out_time": { "type": "integer" },
+          "status": { "type": "boolean" },
+          "justification": { "type": "string" }
+        }
+      },
+      "Group": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "teacher_id": { "type": "string" },
+          "child_ids": { "type": "array", "items": { "type": "string" } }
+        }
+      },
+      "GroupCreate": {
+        "type": "object",
+        "required": ["teacherId"],
+        "properties": {
+          "teacherId": { "type": "string" },
+          "childIds": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

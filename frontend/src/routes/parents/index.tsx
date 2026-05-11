@@ -1,7 +1,7 @@
 "use client";
 // eslint-disable-next-line import/no-duplicates
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AlertCircle,
   Calendar,
@@ -11,6 +11,7 @@ import {
   MessageCircle,
   UserCheck,
   Utensils,
+  ChevronDown,
 } from "lucide-react";
 // eslint-disable-next-line import/no-duplicates
 import { Link } from "@tanstack/react-router";
@@ -24,7 +25,32 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { getFeed, type FeedItem } from "@/lib/rss_feed";
+import { apiGet, type ApiEnvelope } from "@/lib/api";
+
+type ChildDto = {
+  id: string;
+  firstName: string;
+  lastName: string;
+  dob?: string;
+  gender?: string;
+  medicalInfo?: string;
+};
+
+type AttendanceDto = {
+  id: string;
+  status: string;
+  check_in_time?: string | null;
+  check_out_time?: string | null;
+  attendance_date?: string;
+  child_id: string;
+};
 
 // Basic HTML sanitizer that removes <script>/<style> and on* attributes, and javascript: URLs.
 // This is intentionally minimal but sufficient for trusted-feeds like the catering RSS.
@@ -71,18 +97,98 @@ export const Route = createFileRoute("/parents/")({
 
 function ParentsIndex() {
   const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingMenu, setLoadingMenu] = useState(true);
+
+  const [children, setChildren] = useState<ChildDto[]>([]);
+  const [childrenLoading, setChildrenLoading] = useState(true);
+  const [attendanceByChild, setAttendanceByChild] = useState<
+    Record<string, AttendanceDto[]>
+  >({});
+  const [attendanceLoading, setAttendanceLoading] = useState(true);
+
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+
+  const selectedChild = useMemo(() => {
+    if (!selectedChildId) return children[0];
+    return children.find((c) => c.id === selectedChildId) || children[0];
+  }, [children, selectedChildId]);
+
+  const selectedChildName = useMemo(() => {
+    if (!selectedChild) return "your child";
+    return `${selectedChild.firstName} ${selectedChild.lastName}`;
+  }, [selectedChild]);
+
+  const todaysAttendance = useMemo(() => {
+    if (!selectedChild) return null;
+    const list = attendanceByChild[selectedChild.id] || [];
+    if (list.length === 0) return null;
+
+    // Robust latest selection:
+    // 1) Prefer latest by attendance_date if present
+    // 2) otherwise fall back to last element
+    const sorted = [...list].sort((a, b) => {
+      const ad = a.attendance_date ? Date.parse(a.attendance_date) : NaN;
+      const bd = b.attendance_date ? Date.parse(b.attendance_date) : NaN;
+      if (!Number.isNaN(ad) && !Number.isNaN(bd)) return bd - ad;
+      if (!Number.isNaN(bd)) return 1;
+      if (!Number.isNaN(ad)) return -1;
+      return 0;
+    });
+
+    return sorted[0] || list[list.length - 1] || null;
+  }, [attendanceByChild, selectedChild]);
 
   useEffect(() => {
-    async function loadFeed() {
-      // In a real app this URL might come from env or an API
+    async function loadMenu() {
       const apiBase = (import.meta.env.VITE_API_BASE || "").replace(/\/$/, "");
       const url = apiBase ? `${apiBase}/v1/menu/rss` : "/v1/menu/rss";
       const items = await getFeed(url);
       setFeedItems(items);
-      setLoading(false);
+      setLoadingMenu(false);
     }
-    loadFeed();
+    loadMenu();
+  }, []);
+
+  useEffect(() => {
+    async function loadChildrenAndAttendance() {
+      try {
+        setChildrenLoading(true);
+        setAttendanceLoading(true);
+
+        // GET /v1/child/ -> children for current session user
+        const childRes = await apiGet<ApiEnvelope<ChildDto[]>>("/v1/child/");
+        const list = childRes.data || [];
+        setChildren(list);
+        setChildrenLoading(false);
+
+        // Default selection
+        if (!selectedChildId && list[0]?.id) {
+          setSelectedChildId(list[0].id);
+        }
+
+        // Preload attendance for all children (so switching is instant)
+        const byChild: Record<string, AttendanceDto[]> = {};
+        for (const c of list) {
+          try {
+            const attn = await apiGet<AttendanceDto[]>(
+              `/v1/attendance/child/${c.id}/list`,
+            );
+            byChild[c.id] = attn;
+          } catch (e) {
+            console.error("Failed to load attendance for child", c.id, e);
+            byChild[c.id] = [];
+          }
+        }
+        setAttendanceByChild(byChild);
+      } catch (e) {
+        console.error("Failed to load children/attendance:", e);
+      } finally {
+        setChildrenLoading(false);
+        setAttendanceLoading(false);
+      }
+    }
+
+    loadChildrenAndAttendance();
   }, []);
 
   return (
@@ -94,11 +200,50 @@ function ParentsIndex() {
           <div className="absolute top-0 right-0 h-32 w-32 translate-x-8 -translate-y-8 rounded-full bg-primary/5 blur-2xl" />
           <div className="relative z-10 flex items-start justify-between">
             <div className="flex-1">
-              <h2 className="mb-1 text-2xl font-bold tracking-tight">
-                Good morning, Sarah!
-              </h2>
+              <div className="mb-2 flex flex-wrap items-center gap-3">
+                <h2 className="text-2xl font-bold tracking-tight">
+                  {childrenLoading ? "Good morning!" : "Good morning!"}
+                </h2>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm transition-colors hover:bg-muted disabled:opacity-50"
+                      disabled={childrenLoading || children.length === 0}
+                      title="Select child"
+                    >
+                      <span className="max-w-[220px] truncate">
+                        {childrenLoading
+                          ? "Loading children..."
+                          : selectedChild
+                            ? `${selectedChild.firstName} ${selectedChild.lastName}`
+                            : "No child"}
+                      </span>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-64">
+                    {children.length === 0 ? (
+                      <DropdownMenuItem disabled>
+                        No children found
+                      </DropdownMenuItem>
+                    ) : (
+                      children.map((c) => (
+                        <DropdownMenuItem
+                          key={c.id}
+                          onClick={() => setSelectedChildId(c.id)}
+                        >
+                          {c.firstName} {c.lastName}
+                        </DropdownMenuItem>
+                      ))
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+
               <p className="mb-6 text-muted-foreground">
-                Here is your daily overview for Emma.
+                Here is your daily overview for {selectedChildName}.
               </p>
 
               <div className="mb-4 flex items-center gap-3 rounded-lg border bg-background/50 p-4">
@@ -107,11 +252,19 @@ function ParentsIndex() {
                 </div>
                 <div>
                   <p className="font-semibold text-green-600 dark:text-green-400">
-                    Emma is Present
+                    {attendanceLoading || !todaysAttendance
+                      ? `${selectedChildName} status`
+                      : todaysAttendance.status === "present"
+                        ? `${selectedChildName} is Present`
+                        : `${selectedChildName} is ${todaysAttendance.status}`}
                   </p>
                   <div className="flex items-center text-sm text-muted-foreground">
                     <Clock className="mr-1 h-3 w-3" />
-                    Checked in at 8:15 AM by John Doe
+                    {attendanceLoading || !todaysAttendance
+                      ? "Attendance info loading..."
+                      : todaysAttendance.check_in_time
+                        ? `Checked in at ${todaysAttendance.check_in_time}`
+                        : "No check-in time recorded"}
                   </div>
                 </div>
               </div>
@@ -188,7 +341,7 @@ function ParentsIndex() {
 
             <div className="hidden h-24 w-24 shrink-0 overflow-hidden rounded-full border-4 border-background shadow-md sm:block">
               <img
-                src="https://api.dicebear.com/7.x/fun-emoji/svg?seed=Emma"
+                src={`https://api.dicebear.com/7.x/fun-emoji/svg?seed=${encodeURIComponent(selectedChildName)}`}
                 alt="Child avatar"
                 className="h-full w-full bg-primary/10 object-cover"
               />
@@ -218,7 +371,7 @@ function ParentsIndex() {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-3 py-2 max-h-[60vh] overflow-y-auto">
-                  {loading ? (
+                  {loadingMenu ? (
                     <div className="text-center text-sm text-muted-foreground p-4">
                       Loading menu...
                     </div>
@@ -335,7 +488,7 @@ function ParentsIndex() {
           <div className="p-6">
             <div className="mb-6 rounded-xl border bg-muted/10 p-4">
               <p className="text-sm font-semibold mb-2">Today's food</p>
-              {loading ? (
+              {loadingMenu ? (
                 <p className="text-sm text-muted-foreground">Loading menu...</p>
               ) : feedItems.length === 0 ? (
                 <p className="text-sm text-muted-foreground">

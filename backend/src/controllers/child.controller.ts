@@ -53,35 +53,45 @@ export default class ChildController {
       .rightJoin(parentToChild, eq(user.id, parentToChild.parent_id))
       .rightJoin(child, eq(parentToChild.child_id, child.id));
   };
-  static create = async (data: Child) => {
+  static create = async (data: Child, submitterId: string) => {
     data.id = randomUUID();
     if (
       !(
-        data.firstName &&
-        data.lastName &&
-        data.dob &&
-        data.gender &&
-        data.parentIds
+        (data.firstName && data.lastName && data.dob)
+        // parentIds are now optional from the client
       )
     ) {
       return false;
     }
-    let c = await database
-      .insert(child)
-      .values({
-        id: data.id,
-        first_name: data.firstName,
-        last_name: data.lastName,
-        date_of_birth: data.dob,
-        gender: data.gender,
-        medical_info: data.medicalInfo,
-      })
-      .returning();
-    for (let parent of data.parentIds) {
-      await database.insert(parentToChild).values({
-        parent_id: parent,
-        child_id: data.id,
-      });
+    // Build a strongly-typed payload for insertion so TypeScript matches drizzle types
+    const payload: NewChild = {
+      id: data.id!,
+      first_name: data.firstName!,
+      last_name: data.lastName!,
+      date_of_birth: data.dob!,
+      // gender is not nullable in schema; provide a safe default when missing
+      gender: data.gender ?? "unspecified",
+      medical_info: data.medicalInfo ?? null,
+    };
+
+    let c = await database.insert(child).values(payload).returning();
+
+    // Auto-assign the submitter as a parent
+    await database.insert(parentToChild).values({
+      parent_id: submitterId,
+      child_id: data.id,
+    });
+
+    // If other parentIds were provided, add them too
+    if (data.parentIds) {
+      for (let parent of data.parentIds) {
+        if (parent !== submitterId) {
+          await database.insert(parentToChild).values({
+            parent_id: parent,
+            child_id: data.id,
+          });
+        }
+      }
     }
 
     return c;

@@ -1,5 +1,3 @@
-import Parser from "rss-parser";
-
 export type FeedItem = {
   title: string;
   link: string;
@@ -7,11 +5,8 @@ export type FeedItem = {
   contentSnippet?: string;
 };
 
-const parser = new Parser();
-
 /**
- * Placeholder data shown when feed parsing fails or returns no useful items.
- * Kept menu-focused for quick dialog rendering in the UI.
+ * Fallback items used when parsing fails or returns empty results.
  */
 const FALLBACK_MENU_ITEMS: Array<FeedItem> = [
   {
@@ -28,24 +23,64 @@ const FALLBACK_MENU_ITEMS: Array<FeedItem> = [
   },
 ];
 
-function toSafeFeedItem(item: Parser.Item): FeedItem | null {
-  const title = (item.title ?? "").trim();
-  const link = (item.link ?? "").trim();
+function parseXmlFeed(xmlText: string): FeedItem[] {
+  try {
+    // DOMParser is available in browsers; this file is intended for client-side use.
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(xmlText, "application/xml");
 
-  // Keep only entries that can be rendered meaningfully.
-  if (!title) return null;
+    // If the feed produced a parsererror element, bail out.
+    if (doc.querySelector("parsererror")) return [];
 
-  return {
-    title,
-    link: link || "#",
-    pubDate: item.pubDate,
-    contentSnippet: item.contentSnippet,
-  };
+    const rssItems = Array.from(doc.querySelectorAll("item")).map((node) => {
+      const title = node.querySelector("title")?.textContent?.trim() ?? "";
+      const link =
+        node.querySelector("link")?.textContent?.trim() ||
+        node.querySelector("guid")?.textContent?.trim() ||
+        "#";
+      const pubDate = node.querySelector("pubDate")?.textContent ?? undefined;
+      const descriptionNode = node.querySelector("description");
+      const contentEncodedNode = node.querySelector("content\:encoded");
+
+      // Prefer innerHTML so UI can render the original formatting (it's trusted source).
+      const contentSnippet =
+        (descriptionNode && descriptionNode.innerHTML) ||
+        (contentEncodedNode && contentEncodedNode.innerHTML) ||
+        undefined;
+
+      return { title, link, pubDate, contentSnippet } as FeedItem;
+    });
+
+    const atomItems = Array.from(doc.querySelectorAll("entry")).map((node) => {
+      const title = node.querySelector("title")?.textContent?.trim() ?? "";
+      const link =
+        node.querySelector("link")?.getAttribute("href")?.trim() || "#";
+      const pubDate =
+        node.querySelector("updated")?.textContent ??
+        node.querySelector("published")?.textContent ??
+        undefined;
+
+      const summaryNode = node.querySelector("summary");
+      const contentNode = node.querySelector("content");
+      const contentSnippet =
+        (summaryNode && summaryNode.innerHTML) ||
+        (contentNode && contentNode.innerHTML) ||
+        undefined;
+
+      return { title, link, pubDate, contentSnippet } as FeedItem;
+    });
+
+    // Keep only items with a title
+    return [...rssItems, ...atomItems].filter((i) => i.title.length > 0);
+  } catch (e) {
+    console.error("Failed to parse XML feed in browser parser:", e);
+    return [];
+  }
 }
 
 /**
- * Fetch and parse an RSS feed for menu dialog use.
- * Always returns a render-safe array; never throws.
+ * Fetch and parse an RSS/Atom feed using the browser's fetch + DOMParser.
+ * This function never throws; it returns either parsed items or the provided fallback.
  */
 export async function getFeed(
   url: string,
@@ -55,19 +90,23 @@ export async function getFeed(
     const safeUrl = (url ?? "").trim();
     if (!safeUrl) return fallback;
 
-    const feed = await parser.parseURL(safeUrl);
-    const items = (feed.items ?? [])
-      .map(toSafeFeedItem)
-      .filter((item): item is FeedItem => item !== null);
+    const res = await fetch(safeUrl);
+    if (!res.ok) return fallback;
 
-    return items.length > 0 ? items : fallback;
+    const text = await res.text();
+
+    // Prefer DOMParser parsing (works in the browser). If DOMParser isn't available,
+    // fall back to the provided defaults.
+    if (typeof DOMParser !== "undefined") {
+      const items = parseXmlFeed(text);
+      return items.length > 0 ? items : fallback;
+    }
+
+    return fallback;
   } catch (error) {
-    console.error("Failed to parse RSS feed:", error);
+    console.error("Failed to fetch/parse RSS feed:", error);
     return fallback;
   }
 }
 
-/**
- * Optional export if UI wants direct access to defaults.
- */
 export const MENU_FALLBACK_FEED_ITEMS = FALLBACK_MENU_ITEMS;

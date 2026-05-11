@@ -1,6 +1,7 @@
 "use client";
 // eslint-disable-next-line import/no-duplicates
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
   AlertCircle,
   Calendar,
@@ -23,12 +24,67 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { getFeed, type FeedItem } from "@/lib/rss_feed";
+
+// Basic HTML sanitizer that removes <script>/<style> and on* attributes, and javascript: URLs.
+// This is intentionally minimal but sufficient for trusted-feeds like the catering RSS.
+function sanitizeHtml(html: string): string {
+  try {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, "text/html");
+
+    // Remove script and style elements
+    const dangerous = doc.querySelectorAll("script, style");
+    dangerous.forEach((n) => n.remove());
+
+    // Remove event handler attributes and javascript: URLs
+    const all = doc.querySelectorAll("*");
+    all.forEach((el) => {
+      // Remove attributes starting with `on` (onclick, onerror, etc.)
+      Array.from(el.attributes).forEach((attr) => {
+        const name = attr.name.toLowerCase();
+        const value = attr.value || "";
+        if (name.startsWith("on")) {
+          el.removeAttribute(attr.name);
+          return;
+        }
+
+        if (
+          (name === "href" || name === "src") &&
+          value.trim().toLowerCase().startsWith("javascript:")
+        ) {
+          el.removeAttribute(attr.name);
+        }
+      });
+    });
+
+    return doc.body.innerHTML || "";
+  } catch (e) {
+    console.error("sanitizeHtml error:", e);
+    return "";
+  }
+}
 
 export const Route = createFileRoute("/parents/")({
   component: ParentsIndex,
 });
 
 function ParentsIndex() {
+  const [feedItems, setFeedItems] = useState<FeedItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadFeed() {
+      // In a real app this URL might come from env or an API
+      const apiBase = (import.meta.env.VITE_API_BASE || "").replace(/\/$/, "");
+      const url = apiBase ? `${apiBase}/v1/menu/rss` : "/v1/menu/rss";
+      const items = await getFeed(url);
+      setFeedItems(items);
+      setLoading(false);
+    }
+    loadFeed();
+  }, []);
+
   return (
     <div className="relative z-0 space-y-6">
       {/* Welcome & Child Status */}
@@ -161,16 +217,78 @@ function ParentsIndex() {
                     What's on the menu today.
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-3 py-2">
-                  <div className="rounded-lg border bg-muted/20 p-3">
-                    <p className="text-sm font-medium">Breakfast: Oatmeal</p>
-                  </div>
-                  <div className="rounded-lg border bg-muted/20 p-3">
-                    <p className="text-sm font-medium">Lunch: Mac & Cheese</p>
-                  </div>
-                  <div className="rounded-lg border bg-muted/20 p-3">
-                    <p className="text-sm font-medium">Snack: Fruit Slices</p>
-                  </div>
+                <div className="space-y-3 py-2 max-h-[60vh] overflow-y-auto">
+                  {loading ? (
+                    <div className="text-center text-sm text-muted-foreground p-4">
+                      Loading menu...
+                    </div>
+                  ) : feedItems.length === 0 ? (
+                    <div className="text-center text-sm text-muted-foreground p-4">
+                      No menu items found.
+                    </div>
+                  ) : (
+                    feedItems.map((item, index) => (
+                      <div
+                        key={index}
+                        className="rounded-lg border bg-muted/20 p-3"
+                      >
+                        <a
+                          href={item.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="hover:underline"
+                        >
+                          <p className="text-sm font-medium">{item.title}</p>
+                        </a>
+                        {item.contentSnippet && (
+                          <div className="text-xs text-muted-foreground mt-1 prose max-w-none">
+                            {/**
+                             * The description often contains meal labels separated with <br>.
+                             * We'll parse the sanitized HTML and split into blocks by double <br> or by the label words.
+                             */}
+                            {(() => {
+                              const sanitized = sanitizeHtml(
+                                item.contentSnippet,
+                              );
+                              const tmp = document.createElement("div");
+                              tmp.innerHTML = sanitized;
+
+                              // Convert <br> into newline markers then split
+                              tmp.querySelectorAll("br").forEach((b) => {
+                                const n = document.createTextNode("\n");
+                                b.replaceWith(n);
+                              });
+
+                              const text = tmp.textContent || "";
+
+                              // Heuristic: split on two newlines or on meal labels like 'Aamupala', 'Lounas', 'Välipala', 'Päivällinen', 'Iltapala'
+                              const parts = text
+                                .split(
+                                  /\n\n+|(?=Aamupala|Lounas|Välipala|Päivällinen|Iltapala)/,
+                                )
+                                .map((p) => p.trim())
+                                .filter(Boolean);
+
+                              return (
+                                <div className="space-y-2">
+                                  {parts.map((p, i) => (
+                                    <div
+                                      key={i}
+                                      className="rounded-md border bg-muted/10 p-2"
+                                    >
+                                      <p className="text-xs leading-snug whitespace-pre-line">
+                                        {p}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
                 </div>
                 <DialogFooter>
                   <DialogClose asChild>
@@ -215,6 +333,57 @@ function ParentsIndex() {
             </h3>
           </div>
           <div className="p-6">
+            <div className="mb-6 rounded-xl border bg-muted/10 p-4">
+              <p className="text-sm font-semibold mb-2">Today's food</p>
+              {loading ? (
+                <p className="text-sm text-muted-foreground">Loading menu...</p>
+              ) : feedItems.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  No menu items found.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {(() => {
+                    // Use the first item (typically today's menu)
+                    const item = feedItems[0];
+                    if (!item?.contentSnippet) {
+                      return (
+                        <p className="text-sm text-muted-foreground">
+                          Menu details unavailable.
+                        </p>
+                      );
+                    }
+
+                    const sanitized = sanitizeHtml(item.contentSnippet);
+                    const tmp = document.createElement("div");
+                    tmp.innerHTML = sanitized;
+                    tmp.querySelectorAll("br").forEach((b) => {
+                      const n = document.createTextNode("\n");
+                      b.replaceWith(n);
+                    });
+                    const text = tmp.textContent || "";
+                    const parts = text
+                      .split(
+                        /\n\n+|(?=Aamupala|Lounas|Välipala|Päivällinen|Iltapala)/,
+                      )
+                      .map((p) => p.trim())
+                      .filter(Boolean);
+
+                    return parts.slice(0, 6).map((p, i) => (
+                      <div
+                        key={i}
+                        className="rounded-md border bg-background p-2"
+                      >
+                        <p className="text-xs whitespace-pre-line leading-snug">
+                          {p}
+                        </p>
+                      </div>
+                    ));
+                  })()}
+                </div>
+              )}
+            </div>
+
             <div className="relative ml-3 space-y-6 border-l-2 border-muted">
               <div className="relative pl-6">
                 <div className="absolute top-1.5 -left-1.25 h-2 w-2 rounded-full bg-primary ring-4 ring-background" />

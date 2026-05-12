@@ -32,6 +32,65 @@ app.use(
   }),
 );
 app.use(helmet());
+
+// Server-side sign-in helper: create a session and set a cookie for the browser
+app.post("/api/auth/session", async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body as {
+      email?: string;
+      password?: string;
+    };
+    if (!email || !password) {
+      return res.status(400).json({ error: "email and password required" });
+    }
+
+    // Use better-auth server API to sign in
+    const result = await auth.api.signInEmail({
+      body: {
+        email,
+        password,
+        callbackURL: "/",
+        rememberMe: true,
+      },
+    });
+
+    // Debug: log result keys
+    try {
+      console.log("/api/auth/session result keys:", Object.keys(result || {}));
+    } catch (e) {}
+
+    // Try to extract a session token from the response
+    const token =
+      (result as any)?.session?.token ||
+      (result as any)?.session?.id ||
+      (result as any)?.token ||
+      (result as any)?.data?.token ||
+      (result as any)?.user?.token ||
+      null;
+
+    console.log("/api/auth/session extracted token:", !!token);
+
+    if (token) {
+      // Set a cookie for the client. Use dev-friendly flags.
+      res.cookie(process.env.AUTH_COOKIE_NAME || "ba_session", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+
+        path: "/",
+        // optionally set maxAge from result
+      });
+    }
+
+    return res.status(200).json(result);
+  } catch (err: any) {
+    console.error("/api/auth/session error:", err);
+    return res
+      .status(400)
+      .json({ error: "sign-in failed", detail: err?.message });
+  }
+});
+
 app.all("/api/auth/{*any}", toNodeHandler(auth));
 
 // Load OpenAPI spec if present and serve docs

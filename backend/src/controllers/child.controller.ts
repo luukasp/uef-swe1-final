@@ -42,6 +42,27 @@ export default class ChildController {
     return database
       .select({
         id: child.id,
+        firstName: child.first_name,
+        lastName: child.last_name,
+        gender: child.gender,
+        dob: child.date_of_birth,
+        medicalInfo: child.medical_info,
+      })
+      .from(parentToChild)
+      .where(eq(parentToChild.parent_id, id))
+      .innerJoin(child, eq(parentToChild.child_id, child.id));
+  };
+
+  // Alias with clearer name for session-driven lookups (same output shape)
+  static getChildrenForParent = async (parentId: string) => {
+    return ChildController.getChildren(parentId);
+  };
+
+  // Legacy: Select children of a specific parent (older name mapping)
+  static getChildrenLegacy = async (id: string) => {
+    return database
+      .select({
+        id: child.id,
         name: child.first_name,
         surname: child.last_name,
         gender: child.gender,

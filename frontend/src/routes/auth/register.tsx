@@ -1,11 +1,11 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { GalleryVerticalEnd, UserPlus, Plus, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { signUpWithEmail } from "@/lib/api/auth";
-import { apiGet, apiPost } from "@/lib/api";
+import { apiPost } from "@/lib/api";
+import { signUpWithEmail, signInWithEmail } from "@/lib/api/auth";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { GalleryVerticalEnd, Plus, Trash2, UserPlus } from "lucide-react";
+import { useState } from "react";
 
 export const Route = createFileRoute("/auth/register")({
   component: RegisterPage,
@@ -68,20 +68,31 @@ function RegisterPage() {
       return;
     }
 
-    // 2. After successful signup, user is auto-signed-in.
+    // 2. After successful signup, sign in to establish session (required by /v1/child endpoints)
+    const signInRes = await signInWithEmail({ email, password });
+    if (signInRes.error) {
+      setError(
+        "Account created but failed to sign in. Please log in manually.",
+      );
+      setLoading(false);
+      return;
+    }
+
     // Now, create the children and link them to this parent.
     try {
       for (const child of children) {
         if (child.firstName && child.lastName && child.dob) {
-          await apiPost("/v1/child/", {
+          const resp = await apiPost("/v1/child/", {
             firstName: child.firstName,
             lastName: child.lastName,
             dob: child.dob,
             // Gender and medical can be added later
           });
+          // Optionally handle resp
         }
       }
     } catch (e: any) {
+      console.error(e);
       setError("Failed to register children. Please contact support.");
       setLoading(false);
       return;

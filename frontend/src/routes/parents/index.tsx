@@ -101,6 +101,7 @@ function ParentsIndex() {
 
   const [children, setChildren] = useState<ChildDto[]>([]);
   const [childrenLoading, setChildrenLoading] = useState(true);
+  const [childrenError, setChildrenError] = useState<string | null>(null);
   const [attendanceByChild, setAttendanceByChild] = useState<
     Record<string, AttendanceDto[]>
   >({});
@@ -153,13 +154,13 @@ function ParentsIndex() {
     async function loadChildrenAndAttendance() {
       try {
         setChildrenLoading(true);
+        setChildrenError(null);
         setAttendanceLoading(true);
 
         // GET /v1/child/ -> children for current session user
         const childRes = await apiGet<ApiEnvelope<ChildDto[]>>("/v1/child/");
         const list = childRes.data || [];
         setChildren(list);
-        setChildrenLoading(false);
 
         // Default selection
         if (!selectedChildId && list[0]?.id) {
@@ -174,14 +175,28 @@ function ParentsIndex() {
               `/v1/attendance/child/${c.id}/list`,
             );
             byChild[c.id] = attn;
-          } catch (e) {
-            console.error("Failed to load attendance for child", c.id, e);
+          } catch (err: any) {
+            console.error("Failed to load attendance for child", c.id, err);
             byChild[c.id] = [];
           }
         }
         setAttendanceByChild(byChild);
-      } catch (e) {
-        console.error("Failed to load children/attendance:", e);
+      } catch (err: any) {
+        // Some environments stringify Error objects to "{}".
+        // apiGet throws Error("GET ... failed: status - body"), so message is the most useful.
+        const message =
+          err instanceof Error
+            ? err.message
+            : typeof err === "string"
+              ? err
+              : JSON.stringify(err);
+
+        console.error("Failed to load children/attendance:", {
+          err,
+          message,
+        });
+
+        setChildrenError(message);
       } finally {
         setChildrenLoading(false);
         setAttendanceLoading(false);
@@ -224,7 +239,42 @@ function ParentsIndex() {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="w-64">
-                    {children.length === 0 ? (
+                    {childrenLoading ? (
+                      <DropdownMenuItem disabled>Loading...</DropdownMenuItem>
+                    ) : childrenError ? (
+                      <div className="p-3">
+                        <p className="text-sm text-destructive">
+                          Error loading children: {childrenError}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            // retry load
+                            setChildrenLoading(true);
+                            setChildrenError(null);
+                            (async () => {
+                              try {
+                                const childRes =
+                                  await apiGet<ApiEnvelope<ChildDto[]>>(
+                                    "/v1/child/",
+                                  );
+                                const list = childRes.data || [];
+                                setChildren(list);
+                                if (!selectedChildId && list[0]?.id)
+                                  setSelectedChildId(list[0].id);
+                              } catch (err: any) {
+                                setChildrenError(err?.message || String(err));
+                              } finally {
+                                setChildrenLoading(false);
+                              }
+                            })();
+                          }}
+                          className="mt-2 rounded-md bg-muted px-3 py-1 text-sm"
+                        >
+                          Retry
+                        </button>
+                      </div>
+                    ) : children.length === 0 ? (
                       <DropdownMenuItem disabled>
                         No children found
                       </DropdownMenuItem>
@@ -472,6 +522,52 @@ function ParentsIndex() {
               Emergencies
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Children */}
+      <div className="overflow-hidden rounded-2xl border bg-card shadow-sm">
+        <div className="border-b bg-muted/30 px-6 py-4">
+          <h3 className="font-semibold">Your Children</h3>
+        </div>
+        <div className="p-6">
+          {childrenLoading ? (
+            <p className="text-sm text-muted-foreground">Loading children...</p>
+          ) : childrenError ? (
+            <p className="text-sm text-destructive">
+              Error loading children: {childrenError}
+            </p>
+          ) : children.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No children found.</p>
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2">
+              {children.map((c) => {
+                const isSelected = selectedChildId
+                  ? selectedChildId === c.id
+                  : selectedChild?.id === c.id;
+
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => setSelectedChildId(c.id)}
+                    className={`cursor-pointer rounded-xl border p-4 text-left transition-colors hover:bg-muted/40 ${
+                      isSelected ? "bg-muted/40" : "bg-background"
+                    }`}
+                  >
+                    <p className="text-sm font-semibold">
+                      {c.firstName} {c.lastName}
+                    </p>
+                    {c.dob && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        DOB: {c.dob}
+                      </p>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 

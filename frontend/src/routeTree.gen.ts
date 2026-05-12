@@ -13,6 +13,7 @@ import { Route as ParentsRouteRouteImport } from './routes/parents/route'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as StuffIndexRouteImport } from './routes/stuff/index'
 import { Route as ParentsIndexRouteImport } from './routes/parents/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as ParentsNewsRouteImport } from './routes/parents/news'
@@ -20,6 +21,12 @@ import { Route as ParentsMessageRouteImport } from './routes/parents/message'
 import { Route as ParentsEmergenciesRouteImport } from './routes/parents/emergencies'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as StuffPostsIndexRouteImport } from './routes/stuff/posts/index'
+import { Route as StuffMessagesIndexRouteImport } from './routes/stuff/messages/index'
+import { Route as StuffGroupsIndexRouteImport } from './routes/stuff/groups/index'
+import { Route as StuffPostsPostIdRouteImport } from './routes/stuff/posts/$postId'
+import { Route as StuffMessagesThreadIdRouteImport } from './routes/stuff/messages/$threadId'
+import { Route as StuffGroupsGroupIdRouteImport } from './routes/stuff/groups/$groupId'
 
 const ParentsRouteRoute = ParentsRouteRouteImport.update({
   id: '/parents',
@@ -39,6 +46,11 @@ const AdminRouteRoute = AdminRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StuffIndexRoute = StuffIndexRouteImport.update({
+  id: '/stuff/',
+  path: '/stuff/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ParentsIndexRoute = ParentsIndexRouteImport.update({
@@ -76,6 +88,36 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => AuthRouteRoute,
 } as any)
+const StuffPostsIndexRoute = StuffPostsIndexRouteImport.update({
+  id: '/stuff/posts/',
+  path: '/stuff/posts/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StuffMessagesIndexRoute = StuffMessagesIndexRouteImport.update({
+  id: '/stuff/messages/',
+  path: '/stuff/messages/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StuffGroupsIndexRoute = StuffGroupsIndexRouteImport.update({
+  id: '/stuff/groups/',
+  path: '/stuff/groups/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StuffPostsPostIdRoute = StuffPostsPostIdRouteImport.update({
+  id: '/stuff/posts/$postId',
+  path: '/stuff/posts/$postId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StuffMessagesThreadIdRoute = StuffMessagesThreadIdRouteImport.update({
+  id: '/stuff/messages/$threadId',
+  path: '/stuff/messages/$threadId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StuffGroupsGroupIdRoute = StuffGroupsGroupIdRouteImport.update({
+  id: '/stuff/groups/$groupId',
+  path: '/stuff/groups/$groupId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -89,6 +131,13 @@ export interface FileRoutesByFullPath {
   '/parents/news': typeof ParentsNewsRoute
   '/admin/': typeof AdminIndexRoute
   '/parents/': typeof ParentsIndexRoute
+  '/stuff/': typeof StuffIndexRoute
+  '/stuff/groups/$groupId': typeof StuffGroupsGroupIdRoute
+  '/stuff/messages/$threadId': typeof StuffMessagesThreadIdRoute
+  '/stuff/posts/$postId': typeof StuffPostsPostIdRoute
+  '/stuff/groups/': typeof StuffGroupsIndexRoute
+  '/stuff/messages/': typeof StuffMessagesIndexRoute
+  '/stuff/posts/': typeof StuffPostsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -100,6 +149,13 @@ export interface FileRoutesByTo {
   '/parents/news': typeof ParentsNewsRoute
   '/admin': typeof AdminIndexRoute
   '/parents': typeof ParentsIndexRoute
+  '/stuff': typeof StuffIndexRoute
+  '/stuff/groups/$groupId': typeof StuffGroupsGroupIdRoute
+  '/stuff/messages/$threadId': typeof StuffMessagesThreadIdRoute
+  '/stuff/posts/$postId': typeof StuffPostsPostIdRoute
+  '/stuff/groups': typeof StuffGroupsIndexRoute
+  '/stuff/messages': typeof StuffMessagesIndexRoute
+  '/stuff/posts': typeof StuffPostsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -114,6 +170,13 @@ export interface FileRoutesById {
   '/parents/news': typeof ParentsNewsRoute
   '/admin/': typeof AdminIndexRoute
   '/parents/': typeof ParentsIndexRoute
+  '/stuff/': typeof StuffIndexRoute
+  '/stuff/groups/$groupId': typeof StuffGroupsGroupIdRoute
+  '/stuff/messages/$threadId': typeof StuffMessagesThreadIdRoute
+  '/stuff/posts/$postId': typeof StuffPostsPostIdRoute
+  '/stuff/groups/': typeof StuffGroupsIndexRoute
+  '/stuff/messages/': typeof StuffMessagesIndexRoute
+  '/stuff/posts/': typeof StuffPostsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -129,6 +192,13 @@ export interface FileRouteTypes {
     | '/parents/news'
     | '/admin/'
     | '/parents/'
+    | '/stuff/'
+    | '/stuff/groups/$groupId'
+    | '/stuff/messages/$threadId'
+    | '/stuff/posts/$postId'
+    | '/stuff/groups/'
+    | '/stuff/messages/'
+    | '/stuff/posts/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -140,6 +210,13 @@ export interface FileRouteTypes {
     | '/parents/news'
     | '/admin'
     | '/parents'
+    | '/stuff'
+    | '/stuff/groups/$groupId'
+    | '/stuff/messages/$threadId'
+    | '/stuff/posts/$postId'
+    | '/stuff/groups'
+    | '/stuff/messages'
+    | '/stuff/posts'
   id:
     | '__root__'
     | '/'
@@ -153,6 +230,13 @@ export interface FileRouteTypes {
     | '/parents/news'
     | '/admin/'
     | '/parents/'
+    | '/stuff/'
+    | '/stuff/groups/$groupId'
+    | '/stuff/messages/$threadId'
+    | '/stuff/posts/$postId'
+    | '/stuff/groups/'
+    | '/stuff/messages/'
+    | '/stuff/posts/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -160,6 +244,13 @@ export interface RootRouteChildren {
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
   ParentsRouteRoute: typeof ParentsRouteRouteWithChildren
+  StuffIndexRoute: typeof StuffIndexRoute
+  StuffGroupsGroupIdRoute: typeof StuffGroupsGroupIdRoute
+  StuffMessagesThreadIdRoute: typeof StuffMessagesThreadIdRoute
+  StuffPostsPostIdRoute: typeof StuffPostsPostIdRoute
+  StuffGroupsIndexRoute: typeof StuffGroupsIndexRoute
+  StuffMessagesIndexRoute: typeof StuffMessagesIndexRoute
+  StuffPostsIndexRoute: typeof StuffPostsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -190,6 +281,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stuff/': {
+      id: '/stuff/'
+      path: '/stuff'
+      fullPath: '/stuff/'
+      preLoaderRoute: typeof StuffIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/parents/': {
@@ -240,6 +338,48 @@ declare module '@tanstack/react-router' {
       fullPath: '/auth/login'
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof AuthRouteRoute
+    }
+    '/stuff/posts/': {
+      id: '/stuff/posts/'
+      path: '/stuff/posts'
+      fullPath: '/stuff/posts/'
+      preLoaderRoute: typeof StuffPostsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stuff/messages/': {
+      id: '/stuff/messages/'
+      path: '/stuff/messages'
+      fullPath: '/stuff/messages/'
+      preLoaderRoute: typeof StuffMessagesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stuff/groups/': {
+      id: '/stuff/groups/'
+      path: '/stuff/groups'
+      fullPath: '/stuff/groups/'
+      preLoaderRoute: typeof StuffGroupsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stuff/posts/$postId': {
+      id: '/stuff/posts/$postId'
+      path: '/stuff/posts/$postId'
+      fullPath: '/stuff/posts/$postId'
+      preLoaderRoute: typeof StuffPostsPostIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stuff/messages/$threadId': {
+      id: '/stuff/messages/$threadId'
+      path: '/stuff/messages/$threadId'
+      fullPath: '/stuff/messages/$threadId'
+      preLoaderRoute: typeof StuffMessagesThreadIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stuff/groups/$groupId': {
+      id: '/stuff/groups/$groupId'
+      path: '/stuff/groups/$groupId'
+      fullPath: '/stuff/groups/$groupId'
+      preLoaderRoute: typeof StuffGroupsGroupIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -293,6 +433,13 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AuthRouteRoute: AuthRouteRouteWithChildren,
   ParentsRouteRoute: ParentsRouteRouteWithChildren,
+  StuffIndexRoute: StuffIndexRoute,
+  StuffGroupsGroupIdRoute: StuffGroupsGroupIdRoute,
+  StuffMessagesThreadIdRoute: StuffMessagesThreadIdRoute,
+  StuffPostsPostIdRoute: StuffPostsPostIdRoute,
+  StuffGroupsIndexRoute: StuffGroupsIndexRoute,
+  StuffMessagesIndexRoute: StuffMessagesIndexRoute,
+  StuffPostsIndexRoute: StuffPostsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -65,6 +65,23 @@ export async function signInWithEmail({
       //callbacks
     },
   );
+
+  // If better-auth returns a token/session info in data, ask backend to set the cookie as well
+  try {
+    await fetch((import.meta.env.VITE_API_BASE || "") + "/api/auth/session", {
+      method: "POST",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+  } catch (e) {
+    // ignore - server may already set cookie, or we fallback to direct cookie set
+    console.warn(
+      "Failed to set server session cookie via /api/auth/session",
+      e,
+    );
+  }
+
   return { data, error };
 }
 

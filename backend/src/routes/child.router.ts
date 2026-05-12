@@ -6,9 +6,20 @@ import requireSession from "../middlewares/requireSession";
 const cr = Router();
 cr.use(requireSession);
 
+// Children for the currently authenticated parent (session cookie)
 cr.get("/", async (req: Request, res: Response) => {
   const session = await req.session;
-  const c = await ChildController.getChildren(session.user.id);
+  const c = await ChildController.getChildrenForParent(session.user.id);
+  res.status(200).send({
+    status: 200,
+    data: c,
+  });
+});
+
+// Same as GET /, but explicit path name (useful for clarity on the client)
+cr.get("/mine", async (req: Request, res: Response) => {
+  const session = await req.session;
+  const c = await ChildController.getChildrenForParent(session.user.id);
   res.status(200).send({
     status: 200,
     data: c,

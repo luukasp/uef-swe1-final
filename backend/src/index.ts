@@ -1,25 +1,49 @@
-import dotenv from "dotenv";
-dotenv.config();
-import express, {Request, Response} from 'express';
-import bodyParser from 'body-parser';
-import cors from 'cors';
-import helmet from 'helmet';
+import { Elysia } from "elysia";
+import { node } from "@elysiajs/node";
+import { auth } from "./lib/auth"; // Path to your auth file
+import { seed } from "./db/seed";
+import cors from "@elysia/cors";
+import { profileRoutes } from "./routes/profile.route";
+import { childRoutes } from "./routes/child.route";
+import { groupRoutes } from "./routes/group.route";
+import { attendanceRoutes } from "./routes/attendence.route";
+import { rssRoutes } from "./routes/rss.route";
 
-const app = express();
+const app = new Elysia({ adapter: node() })
+  .use(
+    cors({
+      origin: "http://localhost:5000",
+      credentials: true,
+      allowedHeaders: ["Content-Type", "Authorization"],
+    }),
+  )
+  .all("/api/auth/*", ({ request }) => auth.handler(request))
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cors());
-app.use(helmet());
-
-app.all('/{*splat}', async (req: Request, res: Response) => {
-    res.status(404).send({
-        message: "The route or resource you were looking for does not exist or could not be found",
-        time: new Date().toISOString(),
-        status: 'not_found',
+  // 1. First, define the session context
+  .derive(async ({ request }) => {
+    const session = await auth.api.getSession({
+      headers: request.headers,
     });
-});
+    return { session };
+  })
 
-app.listen(process.env.PORT || 3306, () => {
-    console.error(`Fuck you. It's alive`);
-});
+  // 2. Then, mount your routes so they can use the session
+  .group("/api", (app) =>
+    app
+      .use(profileRoutes)
+      .use(childRoutes)
+      .use(groupRoutes)
+      .use(attendanceRoutes)
+      .use(rssRoutes)
+      .get("/me", ({ session, set }) => {
+        if (!session) {
+          set.status = 401;
+          return { message: "Unauthorized" };
+        }
+        return session.user;
+      }),
+  )
+  .listen(3000);
+seed().catch(console.error);
+console.log(`🦊 Elysia is running at http://localhost:3000`);
+// Run seed on startup

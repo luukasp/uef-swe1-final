@@ -9,12 +9,36 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AboutRouteImport } from './routes/about'
+import { Route as TeachersRouteRouteImport } from './routes/teachers/route'
+import { Route as ParentsRouteRouteImport } from './routes/parents/route'
+import { Route as AuthRouteRouteImport } from './routes/auth/route'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TeachersIndexRouteImport } from './routes/teachers/index'
+import { Route as ParentsIndexRouteImport } from './routes/parents/index'
+import { Route as ParentsScheduleRouteImport } from './routes/parents/schedule'
+import { Route as ParentsMessagesRouteImport } from './routes/parents/messages'
+import { Route as AuthRegisterRouteImport } from './routes/auth/register'
+import { Route as AuthLoginRouteImport } from './routes/auth/login'
 
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const TeachersRouteRoute = TeachersRouteRouteImport.update({
+  id: '/teachers',
+  path: '/teachers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ParentsRouteRoute = ParentsRouteRouteImport.update({
+  id: '/parents',
+  path: '/parents',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRouteRoute = AuthRouteRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -22,40 +46,151 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TeachersIndexRoute = TeachersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => TeachersRouteRoute,
+} as any)
+const ParentsIndexRoute = ParentsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ParentsRouteRoute,
+} as any)
+const ParentsScheduleRoute = ParentsScheduleRouteImport.update({
+  id: '/schedule',
+  path: '/schedule',
+  getParentRoute: () => ParentsRouteRoute,
+} as any)
+const ParentsMessagesRoute = ParentsMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => ParentsRouteRoute,
+} as any)
+const AuthRegisterRoute = AuthRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteRoute
+  '/auth': typeof AuthRouteRouteWithChildren
+  '/parents': typeof ParentsRouteRouteWithChildren
+  '/teachers': typeof TeachersRouteRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/parents/messages': typeof ParentsMessagesRoute
+  '/parents/schedule': typeof ParentsScheduleRoute
+  '/parents/': typeof ParentsIndexRoute
+  '/teachers/': typeof TeachersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteRoute
+  '/auth': typeof AuthRouteRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/parents/messages': typeof ParentsMessagesRoute
+  '/parents/schedule': typeof ParentsScheduleRoute
+  '/parents': typeof ParentsIndexRoute
+  '/teachers': typeof TeachersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
+  '/admin': typeof AdminRouteRoute
+  '/auth': typeof AuthRouteRouteWithChildren
+  '/parents': typeof ParentsRouteRouteWithChildren
+  '/teachers': typeof TeachersRouteRouteWithChildren
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/register': typeof AuthRegisterRoute
+  '/parents/messages': typeof ParentsMessagesRoute
+  '/parents/schedule': typeof ParentsScheduleRoute
+  '/parents/': typeof ParentsIndexRoute
+  '/teachers/': typeof TeachersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/parents'
+    | '/teachers'
+    | '/auth/login'
+    | '/auth/register'
+    | '/parents/messages'
+    | '/parents/schedule'
+    | '/parents/'
+    | '/teachers/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about'
-  id: '__root__' | '/' | '/about'
+  to:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/auth/login'
+    | '/auth/register'
+    | '/parents/messages'
+    | '/parents/schedule'
+    | '/parents'
+    | '/teachers'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/parents'
+    | '/teachers'
+    | '/auth/login'
+    | '/auth/register'
+    | '/parents/messages'
+    | '/parents/schedule'
+    | '/parents/'
+    | '/teachers/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AboutRoute: typeof AboutRoute
+  AdminRouteRoute: typeof AdminRouteRoute
+  AuthRouteRoute: typeof AuthRouteRouteWithChildren
+  ParentsRouteRoute: typeof ParentsRouteRouteWithChildren
+  TeachersRouteRoute: typeof TeachersRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/teachers': {
+      id: '/teachers'
+      path: '/teachers'
+      fullPath: '/teachers'
+      preLoaderRoute: typeof TeachersRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/parents': {
+      id: '/parents'
+      path: '/parents'
+      fullPath: '/parents'
+      preLoaderRoute: typeof ParentsRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -65,12 +200,99 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/teachers/': {
+      id: '/teachers/'
+      path: '/'
+      fullPath: '/teachers/'
+      preLoaderRoute: typeof TeachersIndexRouteImport
+      parentRoute: typeof TeachersRouteRoute
+    }
+    '/parents/': {
+      id: '/parents/'
+      path: '/'
+      fullPath: '/parents/'
+      preLoaderRoute: typeof ParentsIndexRouteImport
+      parentRoute: typeof ParentsRouteRoute
+    }
+    '/parents/schedule': {
+      id: '/parents/schedule'
+      path: '/schedule'
+      fullPath: '/parents/schedule'
+      preLoaderRoute: typeof ParentsScheduleRouteImport
+      parentRoute: typeof ParentsRouteRoute
+    }
+    '/parents/messages': {
+      id: '/parents/messages'
+      path: '/messages'
+      fullPath: '/parents/messages'
+      preLoaderRoute: typeof ParentsMessagesRouteImport
+      parentRoute: typeof ParentsRouteRoute
+    }
+    '/auth/register': {
+      id: '/auth/register'
+      path: '/register'
+      fullPath: '/auth/register'
+      preLoaderRoute: typeof AuthRegisterRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
   }
 }
 
+interface AuthRouteRouteChildren {
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
+}
+
+const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthLoginRoute: AuthLoginRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
+}
+
+const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
+  AuthRouteRouteChildren,
+)
+
+interface ParentsRouteRouteChildren {
+  ParentsMessagesRoute: typeof ParentsMessagesRoute
+  ParentsScheduleRoute: typeof ParentsScheduleRoute
+  ParentsIndexRoute: typeof ParentsIndexRoute
+}
+
+const ParentsRouteRouteChildren: ParentsRouteRouteChildren = {
+  ParentsMessagesRoute: ParentsMessagesRoute,
+  ParentsScheduleRoute: ParentsScheduleRoute,
+  ParentsIndexRoute: ParentsIndexRoute,
+}
+
+const ParentsRouteRouteWithChildren = ParentsRouteRoute._addFileChildren(
+  ParentsRouteRouteChildren,
+)
+
+interface TeachersRouteRouteChildren {
+  TeachersIndexRoute: typeof TeachersIndexRoute
+}
+
+const TeachersRouteRouteChildren: TeachersRouteRouteChildren = {
+  TeachersIndexRoute: TeachersIndexRoute,
+}
+
+const TeachersRouteRouteWithChildren = TeachersRouteRoute._addFileChildren(
+  TeachersRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AboutRoute: AboutRoute,
+  AdminRouteRoute: AdminRouteRoute,
+  AuthRouteRoute: AuthRouteRouteWithChildren,
+  ParentsRouteRoute: ParentsRouteRouteWithChildren,
+  TeachersRouteRoute: TeachersRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
